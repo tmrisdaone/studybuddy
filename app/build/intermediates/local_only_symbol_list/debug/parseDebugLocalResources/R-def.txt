@@ -1,0 +1,18 @@
+R_DEF: Internal format may change without notice
+local
+color background
+color onBackground
+color onPrimary
+color onSecondary
+color onSurface
+color outline
+color primary
+color primaryContainer
+color secondary
+color surface
+color surfaceVariant
+string app_name
+string chat_hint
+style Theme.StudyBuddy
+xml backup_rules
+xml data_extraction_rules
