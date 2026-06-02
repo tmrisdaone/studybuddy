@@ -19,4 +19,20 @@ jobs:
         with:
           api-level: 34
           build-tools: 34.0.0
-      - run: ./gradlew --no-daemon assembleDebug
+      - name: Dump build logs
+        if: always()
+        run: |
+          set -e
+          LOG_DIR="${{ runner.temp }}/studybuddy-logs"
+          mkdir -p "$LOG_DIR"
+          if [ -d app/build/reports ]; then
+            cp -r app/build/reports "$LOG_DIR/reports" || true
+          fi
+          ./gradlew --no-daemon :app:compileDebugKotlin --info 2>&1 | tee "$LOG_DIR/compile-debug-kotlin.log" || true
+          ./gradlew --no-daemon :app:processDebugResources --info 2>&1 | tee "$LOG_DIR/process-debug-resources.log" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-logs-${{ github.run_number }}
+          path: ${{ runner.temp }}/studybuddy-logs/
+          retention-days: 7
