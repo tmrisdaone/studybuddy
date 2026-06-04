@@ -33,7 +33,7 @@ jobs:
           find . -type d -name .git -prune -o -type d -exec chmod 755 {} \; || true
 
       - name: Set up Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: 8.10.2
 
