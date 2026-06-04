@@ -16,7 +16,9 @@ import com.tmrisdaone.studybuddy.ui.navigation.StudyBuddyNavHost
 import com.tmrisdaone.studybuddy.ui.screens.*
 import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
 import com.tmrisdaone.studybuddy.ui.viewmodels.*
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
