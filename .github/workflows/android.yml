@@ -19,7 +19,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -33,35 +32,20 @@ jobs:
         run: |
           find . -type d -name .git -prune -o -type d -exec chmod 755 {} \; || true
 
-      - name: Gradle cache
-        uses: actions/cache@v4
+      - name: Set up Gradle
+        uses: gradle/gradle@v2
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
-      - name: Run detekt
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-        continue-on-error: true
-        run: ./gradlew --no-daemon detekt || true
-
-      - name: Run spotless check
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-        continue-on-error: true
-        run: ./gradlew --no-daemon spotlessCheck || true
+          gradle-version: 8.10.2
 
       - name: Run unit tests
-        run: ./gradlew --no-daemon testDebugUnitTest --stacktrace
+        run: gradle testDebugUnitTest --stacktrace
 
       - name: Build debug APK
-        run: ./gradlew --no-daemon assembleDebug --stacktrace
+        run: gradle assembleDebug --stacktrace
 
       - name: Build release bundle
         if: github.ref == 'refs/heads/main'
-        run: ./gradlew --no-daemon bundleRelease --stacktrace
+        run: gradle bundleRelease --stacktrace
 
       - name: Upload debug APK
         if: always()
