@@ -54,15 +54,14 @@ jobs:
         run: ./gradlew --no-daemon spotlessCheck || true
 
       - name: Run unit tests
-        continue-on-error: true
-        run: ./gradlew --no-daemon testDebugUnitTest --stacktrace || true
+        run: ./gradlew --no-daemon testDebugUnitTest --stacktrace
 
       - name: Build debug APK
-        run: ./gradlew --no-daemon assembleDebug --stacktrace || true
+        run: ./gradlew --no-daemon assembleDebug --stacktrace
 
       - name: Build release bundle
         if: github.ref == 'refs/heads/main'
-        run: ./gradlew --no-daemon bundleRelease --stacktrace || true
+        run: ./gradlew --no-daemon bundleRelease --stacktrace
 
       - name: Upload debug APK
         if: always()
