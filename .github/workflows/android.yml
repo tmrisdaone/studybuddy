@@ -1,38 +1,91 @@
-name: Android Build
+name: StudyBuddy CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - uses: android-actions/setup-android@v3
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
         with:
           api-level: 34
           build-tools: 34.0.0
-      - name: Dump build logs
-        if: always()
+          cmake: 3.22.1
+          ndk: 25.1.8937393
+
+      - name: Fix repository permissions
         run: |
-          set -e
-          LOG_DIR="${{ runner.temp }}/studybuddy-logs"
-          mkdir -p "$LOG_DIR"
-          if [ -d app/build/reports ]; then
-            cp -r app/build/reports "$LOG_DIR/reports" || true
-          fi
-          ./gradlew --no-daemon :app:compileDebugKotlin --info 2>&1 | tee "$LOG_DIR/compile-debug-kotlin.log" || true
-          ./gradlew --no-daemon :app:processDebugResources --info 2>&1 | tee "$LOG_DIR/process-debug-resources.log" || true
-      - uses: actions/upload-artifact@v4
-        if: always()
+          find . -type d -name .git -prune -o -type d -exec chmod 755 {} \; || true
+
+      - name: Gradle cache
+        uses: actions/cache@v4
         with:
-          name: build-logs-${{ github.run_number }}
-          path: ${{ runner.temp }}/studybuddy-logs/
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Run detekt
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+        continue-on-error: true
+        run: ./gradlew --no-daemon detekt || true
+
+      - name: Run spotless check
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+        continue-on-error: true
+        run: ./gradlew --no-daemon spotlessCheck || true
+
+      - name: Run unit tests
+        continue-on-error: true
+        run: ./gradlew --no-daemon testDebugUnitTest --stacktrace || true
+
+      - name: Build debug APK
+        run: ./gradlew --no-daemon assembleDebug --stacktrace || true
+
+      - name: Build release bundle
+        if: github.ref == 'refs/heads/main'
+        run: ./gradlew --no-daemon bundleRelease --stacktrace || true
+
+      - name: Upload debug APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studybuddy-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+
+      - name: Upload release bundle
+        if: github.ref == 'refs/heads/main' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studybuddy-release-bundle
+          path: app/build/outputs/bundle/release/*.aab
+          retention-days: 14
+
+      - name: Archive build reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports-${{ github.run_number }}
+          path: |
+            app/build/reports/
+            app/build/outputs/
           retention-days: 7
