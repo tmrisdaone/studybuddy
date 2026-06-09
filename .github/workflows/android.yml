@@ -19,10 +19,11 @@ jobs:
         with:
           api-level: 34
           ndk: 27.1.12297006
-      - name: Verify toolchain
-        run: java -version && javac -version && echo "ANDROID_HOME=$ANDROID_HOME"
-      - name: Install dependencies
-        run: apt-get update -qq && apt-get install -y -qq build-essential unzip wget >/dev/null && wget -q https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -O /tmp/gradle.zip && unzip -q /tmp/gradle.zip -d /opt && ln -sf /opt/gradle-8.10.2/bin/gradle /usr/local/bin/gradle
+      - name: Install Gradle
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -O /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /opt
+          echo "/opt/gradle-8.10.2/bin" >> $GITHUB_PATH
       - run: gradle --no-daemon assembleDebug
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
