@@ -20,6 +20,7 @@ jobs:
         with:
           api-level: 34
           ndk: 27.1.12297006
-      - run: ./gradlew --no-daemon assembleDebug
+      - uses: gradle/actions/setup-gradle@v4
+      - run: gradle --no-daemon assembleDebug
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
