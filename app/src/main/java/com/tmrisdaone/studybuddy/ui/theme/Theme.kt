@@ -17,22 +17,47 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF1a1a2e),
-    surface = Color(0xFF0a0a14),
+    primary = Color(0xFF03DAC6),
+    secondary = Color(0xFFBB86FC),
+    tertiary = Color(0xFFCF667B),
+    surface = Color(0xFF121212),
+    onPrimary = Color.Black,
+    onSecondary = Color.Black,
+    onTertiary = Color.Black,
+    onSurface = Color.White
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF6200EE),
+    secondary = Color(0xFF03DAC6),
+    tertiary = Color(0xFFCF667B),
+    surface = Color.White,
     onPrimary = Color.White,
-    onSurface = Color(0xFFe0e0e0),
-    secondary = Color(0xFFe94560)
+    onSecondary = Color.Black,
+    onTertiary = Color.Black,
+    onSurface = Color.Black
 )
 
 @Composable
-fun StudyBuddyTheme(darkTheme: Boolean = true, content: @Composable () -> Unit) {
-    val colorScheme = DarkColorScheme
+fun StudyBuddyTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    val ctx = LocalContext.current
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            if (darkTheme) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
+        }
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
     MaterialTheme(colorScheme = colorScheme, content = content)

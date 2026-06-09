@@ -53,4 +53,15 @@ class GroqClient(private val apiKey: String) {
         },
         model = "llama-3.1-8b-instant"
     )
+
+    suspend fun generateFlashcards(context: String, count: Int = 10): String = chat(
+        system = "You are a study assistant. Generate $count flashcards from the context.",
+        user = buildString {
+            appendLine("Create flashcards from this material:\n")
+            appendLine(context.take(12000))
+            appendLine("\nFormat as JSON array of objects: {front: String, back: String}.")
+            appendLine("Return ONLY pure JSON array.")
+        },
+        model = "llama-3.1-8b-instant"
+    )
 }

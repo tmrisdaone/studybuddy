@@ -8,6 +8,7 @@ import com.tmrisdaone.studybuddy.domain.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
+import org.json.JSONArray
 
 class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val context: Context) {
     private val scraper = ProotScraper()
@@ -26,6 +27,13 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
     suspend fun scrapeUrl(url: String): String = scraper.fetchText(url)
 
     suspend fun scrapeYoutube(videoId: String): String = scraper.fetchYoutube(videoId)
+
+    suspend fun summarizeText(text: String, model: String = "llama-3.1-8b-instant"): String {
+        val system = "Summarize the following text concisely for a student."
+        return groq.chat(system, text.take(4000), model)
+    }
+
+    suspend fun extractPdfText(localPath: String): String = scraper.fetchPdfText(localPath)
 
     suspend fun chat(sessionId: Long, userMsg: String, systemPrompt: String, model: String): String {
         val response = groq.chat(systemPrompt, userMsg, model)
@@ -65,9 +73,42 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
         return quizId
     }
 
+    suspend fun generateFlashcards(sessionId: Long, context: String, title: String, count: Int = 10): Long {
+        val deckId = db.studySessionDao().insert(
+            StudySessionEntity(type = "flashcards", title = title, inputType = "text", createdAt = Clock.System.now())
+        )
+        val raw = groq.generateFlashcards(context, count)
+        val cards = parseFlashcards(raw)
+        cards.forEach { card ->
+            db.flashCardDao().insert(
+                FlashCardEntity(
+                    sessionId = sessionId,
+                    deckName = title,
+                    front = card["front"]?.toString() ?: "",
+                    back = card["back"]?.toString() ?: "",
+                    tags = "",
+                    nextReview = Clock.System.now(),
+                    createdAt = Clock.System.now()
+                )
+            )
+        }
+        return deckId
+    }
+
+    suspend fun createSession(type: String, title: String, inputType: String): Long {
+        return db.studySessionDao().insert(
+            StudySessionEntity(
+                type = type,
+                title = title,
+                inputType = inputType,
+                createdAt = Clock.System.now()
+            )
+        )
+    }
+
     private fun parseQuizJson(raw: String): List<Map<String, Any?>> {
         return try {
-            val arr = org.json.JSONArray(raw)
+            val arr = JSONArray(raw)
             List(arr.length()) { i ->
                 val obj = arr.getJSONObject(i)
                 mapOf(
@@ -80,6 +121,19 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
                     ),
                     "correct" to obj.optInt("correctAnswer", 0),
                     "explanation" to obj.optString("explanation")
+                )
+            }
+        } catch (e: Exception) { emptyList() }
+    }
+
+    private fun parseFlashcards(raw: String): List<Map<String, String?>> {
+        return try {
+            val arr = JSONArray(raw)
+            List(arr.length()) { i ->
+                val obj = arr.getJSONObject(i)
+                mapOf(
+                    "front" to obj.optString("front"),
+                    "back" to obj.optString("back")
                 )
             }
         } catch (e: Exception) { emptyList() }

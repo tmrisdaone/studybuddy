@@ -19,7 +19,12 @@ class ProotScraper {
     }
 
     suspend fun fetchYoutube(videoId: String): String = withContext(Dispatchers.IO) {
-        val cmd = """yt-dlp --print "TITLE:%(title)s\nDESC:%(description)s" "https://youtube.com/watch?v=$videoId" 2>/dev/null || echo "FAIL"`
+        val cmd = """yt-dlp --print "TITLE:%(title)s\nDESC:%(description)s" "https://youtube.com/watch?v=$videoId" 2>/dev/null || echo "FAIL"` 
+        execute(cmd)
+    }
+
+    suspend fun fetchPdfText(filePath: String): String = withContext(Dispatchers.IO) {
+        val cmd = """pdftotext "$filePath" - 2>/dev/null || echo "PDF_PARSE_FAIL""""
         execute(cmd)
     }
 
