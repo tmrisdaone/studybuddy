@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><data-extraction-rules><device-backup><include domain="database" path="."/><exclude domain="database" path="device_prefs.xml"/></device-backup></data-extraction-rules>
