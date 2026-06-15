@@ -13,7 +13,7 @@ import org.json.JSONArray
 class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val context: Context) {
     private val scraper = ProotScraper()
     private val groq: GroqClient
-        get() = GroqClient(db.preferenceDao().get("groq_api_key", "") ?: "")
+        get() = GroqClient(db.preferenceDao().get("groq_api_key") ?: "")
 
     val sessions: Flow<List<StudySession>> =
         db.studySessionDao().getAll().map { it.map { s -> s.toDomain() } }

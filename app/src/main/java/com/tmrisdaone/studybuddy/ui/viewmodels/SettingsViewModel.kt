@@ -20,9 +20,9 @@ class SettingsViewModel(private val db: StudyBuddyDatabase) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            _groqKey.value = db.preferenceDao().get("groq_api_key", "") ?: ""
-            _sttModel.value = db.preferenceDao().get("stt_model", "whisper-large-v3-turbo") ?: "whisper-large-v3-turbo"
-            _llmModel.value = db.preferenceDao().get("llm_model", "llama-3.1-8b-instant") ?: "llama-3.1-8b-instant"
+            _groqKey.value = db.preferenceDao().get("groq_api_key") ?: ""
+            _sttModel.value = db.preferenceDao().get("stt_model") ?: "whisper-large-v3-turbo"
+            _llmModel.value = db.preferenceDao().get("llm_model") ?: "llama-3.1-8b-instant"
         }
     }
 

@@ -12,7 +12,7 @@ data class PreferenceEntity(
 @Dao
 interface PreferenceDao {
     @Query("SELECT value FROM preferences WHERE key = :key")
-    suspend fun get(key: String, default: String? = null): String?
+    suspend fun get(key: String): String?
 
     @Query("SELECT * FROM preferences")
     fun getAll(): Flow<List<PreferenceEntity>>
