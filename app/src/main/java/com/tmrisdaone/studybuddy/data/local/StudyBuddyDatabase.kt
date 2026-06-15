@@ -18,7 +18,6 @@ import androidx.room.TypeConverters
     version = 1,
     exportSchema = false
 )
-@TypeConverters(TypeConverters::class)
 abstract class StudyBuddyDatabase : RoomDatabase() {
     abstract fun studySessionDao(): StudySessionDao
     abstract fun flashCardDao(): FlashCardDao

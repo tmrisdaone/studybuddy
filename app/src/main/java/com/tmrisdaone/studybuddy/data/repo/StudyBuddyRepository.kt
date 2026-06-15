@@ -52,7 +52,12 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
 
     suspend fun generateQuiz(sessionId: Long, context: String, title: String): Long {
         val quizId = db.quizDao().insertQuiz(
-            QuizEntity(sessionId = sessionId, title = title, questionCount = 0, createdAt = Clock.System.now())
+            QuizEntity(
+                sessionId = sessionId,
+                title = title,
+                questionCount = 0,
+                createdAt = Clock.System.now().toEpochMilliseconds()
+            )
         )
         val response = groq.generateQuiz(context)
         val questions = parseQuizJson(response)
@@ -75,11 +80,17 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
 
     suspend fun generateFlashcards(sessionId: Long, context: String, title: String, count: Int = 10): Long {
         val deckId = db.studySessionDao().insert(
-            StudySessionEntity(type = "flashcards", title = title, inputType = "text", createdAt = Clock.System.now())
+            StudySessionEntity(
+                type = "flashcards",
+                title = title,
+                inputType = "text",
+                createdAt = Clock.System.now().toEpochMilliseconds()
+            )
         )
         val raw = groq.generateFlashcards(context, count)
         val cards = parseFlashcards(raw)
         cards.forEach { card ->
+            val now = Clock.System.now().toEpochMilliseconds()
             db.flashCardDao().insert(
                 FlashCardEntity(
                     sessionId = sessionId,
@@ -87,8 +98,8 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
                     front = card["front"]?.toString() ?: "",
                     back = card["back"]?.toString() ?: "",
                     tags = "",
-                    nextReview = Clock.System.now(),
-                    createdAt = Clock.System.now()
+                    nextReview = now,
+                    createdAt = now
                 )
             )
         }
@@ -101,7 +112,7 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
                 type = type,
                 title = title,
                 inputType = inputType,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now().toEpochMilliseconds()
             )
         )
     }

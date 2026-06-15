@@ -13,7 +13,7 @@ data class StudySessionEntity(
     val inputType: String, // text, pdf, docx, youtube_url, image, audio
     val sourceUri: String?,
     val modelUsed: String?,
-    val createdAt: Instant
+    val createdAt: Long // epoch milliseconds
 )
 
 @Entity(tableName = "flashcards")
@@ -26,8 +26,8 @@ data class FlashCardEntity(
     val tags: String, // comma separated
     val easeFactor: Float = 2.5f,
     val intervalDays: Int = 1,
-    val nextReview: Instant,
-    val createdAt: Instant
+    val nextReview: Long, // epoch milliseconds
+    val createdAt: Long // epoch milliseconds
 )
 
 @Entity(tableName = "quizzes")
@@ -36,7 +36,7 @@ data class QuizEntity(
     val sessionId: Long,
     val title: String,
     val questionCount: Int,
-    val createdAt: Instant
+    val createdAt: Long // epoch milliseconds
 )
 
 @Entity(tableName = "quiz_questions")
@@ -59,7 +59,7 @@ data class DocumentEntity(
     val mimeType: String,
     val sizeBytes: Long,
     val textContent: String,
-    val createdAt: Instant
+    val createdAt: Long // epoch milliseconds
 )
 
 @Entity(tableName = "chat_messages")
@@ -68,7 +68,7 @@ data class ChatMessageEntity(
     val sessionId: Long,
     val role: String, // user, assistant
     val content: String,
-    val createdAt: Instant
+    val createdAt: Long // epoch milliseconds
 )
 
 // Extension functions for Entity -> Domain mapping
@@ -80,7 +80,7 @@ fun StudySessionEntity.toDomain(): StudySession = StudySession(
     inputType = inputType,
     sourceUri = sourceUri,
     modelUsed = modelUsed,
-    createdAt = createdAt
+    createdAt = Instant.fromEpochMilliseconds(createdAt)
 )
 
 fun FlashCardEntity.toDomain(): FlashCard = FlashCard(
@@ -92,8 +92,8 @@ fun FlashCardEntity.toDomain(): FlashCard = FlashCard(
     tags = tags,
     easeFactor = easeFactor,
     intervalDays = intervalDays,
-    nextReview = nextReview,
-    createdAt = createdAt
+    nextReview = Instant.fromEpochMilliseconds(nextReview),
+    createdAt = Instant.fromEpochMilliseconds(createdAt)
 )
 
 fun DocumentEntity.toDomain(): Document = Document(
@@ -102,7 +102,7 @@ fun DocumentEntity.toDomain(): Document = Document(
     mimeType = mimeType,
     sizeBytes = sizeBytes,
     textContent = textContent,
-    createdAt = createdAt
+    createdAt = Instant.fromEpochMilliseconds(createdAt)
 )
 
 fun ChatMessageEntity.toDomain(): ChatMessage = ChatMessage(
@@ -110,7 +110,7 @@ fun ChatMessageEntity.toDomain(): ChatMessage = ChatMessage(
     sessionId = sessionId,
     role = role,
     content = content,
-    createdAt = createdAt
+    createdAt = Instant.fromEpochMilliseconds(createdAt)
 )
 
 fun QuizEntity.toDomain() = Quiz(
@@ -118,7 +118,7 @@ fun QuizEntity.toDomain() = Quiz(
     sessionId = sessionId,
     title = title,
     questionCount = questionCount,
-    createdAt = createdAt
+    createdAt = Instant.fromEpochMilliseconds(createdAt)
 )
 
 fun QuizQuestionEntity.toDomain() = QuizQuestion(

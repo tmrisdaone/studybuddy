@@ -31,11 +31,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    // Room KSP: register TypeConverters so processor sees them
-    ksp {
-        arg("room.typeConverters", "com.tmrisdaone.studybuddy.data.local.TypeConverters")
-    }
 }
 
 dependencies {
@@ -44,9 +39,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // kotlinx-datetime (for Instant in Room entities)
+    // kotlinx-datetime (for Instant in domain models)
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-    ksp("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 
     // Compose
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
@@ -60,10 +54,10 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.50")
     ksp("com.google.dagger:hilt-android-compiler:2.50")
 
-    // Room
-    implementation("androidx.room:room-runtime:2.7.0-alpha02")
-    implementation("androidx.room:room-ktx:2.7.0-alpha02")
-    ksp("androidx.room:room-compiler:2.7.0-alpha02")
+    // Room (stable, no TypeConverters needed)
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
 
     // Network
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
