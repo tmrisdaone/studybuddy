@@ -5,15 +5,19 @@ import com.tmrisdaone.studybuddy.data.local.*
 import com.tmrisdaone.studybuddy.data.remote.GroqClient
 import com.tmrisdaone.studybuddy.data.remote.ProotScraper
 import com.tmrisdaone.studybuddy.domain.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import org.json.JSONArray
 
 class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val context: Context) {
     private val scraper = ProotScraper()
-    private val groq: GroqClient
-        get() = GroqClient(db.preferenceDao().get("groq_api_key") ?: "")
+    private val groq: GroqClient by lazy {
+        val key = db.preferenceDao().get("groq_api_key") ?: ""
+        GroqClient(key)
+    }
 
     val sessions: Flow<List<StudySession>> =
         db.studySessionDao().getAll().map { it.map { s -> s.toDomain() } }
@@ -37,15 +41,18 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
 
     suspend fun chat(sessionId: Long, userMsg: String, systemPrompt: String, model: String): String {
         val response = groq.chat(systemPrompt, userMsg, model)
+        val now = Clock.System.now().toEpochMilliseconds()
         db.chatMessageDao().insert(
-            ChatMessageEntity(sessionId = sessionId, role = "user", content = userMsg, createdAt = Clock.System.now())
+            ChatMessageEntity(sessionId = sessionId, role = "user", content = userMsg, createdAt = now)
         )
         db.chatMessageDao().insert(
-            ChatMessageEntity(sessionId = sessionId, role = "assistant", content = response, createdAt = Clock.System.now())
+            ChatMessageEntity(sessionId = sessionId, role = "assistant", content = response, createdAt = now)
         )
         val session = db.studySessionDao().get(sessionId)
         if (session != null) {
-            db.studySessionDao().insert(session.copy(summary = response.take(200)))
+            db.studySessionDao().insert(
+                session.copy(summary = response.take(200))
+            )
         }
         return response
     }
@@ -63,15 +70,16 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
         val questions = parseQuizJson(response)
         db.quizDao().insertQuestions(
             questions.mapIndexed { idx, q ->
+                val options = (q["options"] as? List<*>) ?: emptyList()
                 QuizQuestionEntity(
                     quizId = quizId,
-                    questionText = q["question"] ?: "",
-                    optionA = q["options"]?.getOrNull(0)?.toString() ?: "",
-                    optionB = q["options"]?.getOrNull(1)?.toString() ?: "",
-                    optionC = q["options"]?.getOrNull(2)?.toString() ?: "",
-                    optionD = q["options"]?.getOrNull(3)?.toString() ?: "",
-                    correctAnswer = (q["correct"] as Number?)?.toInt() ?: 0,
-                    explanation = q["explanation"] ?: ""
+                    questionText = q["question"] as? String ?: "",
+                    optionA = (options.getOrNull(0) as? String) ?: "",
+                    optionB = (options.getOrNull(1) as? String) ?: "",
+                    optionC = (options.getOrNull(2) as? String) ?: "",
+                    optionD = (options.getOrNull(3) as? String) ?: "",
+                    correctAnswer = (q["correct"] as? Number)?.toInt() ?: 0,
+                    explanation = q["explanation"] as? String ?: ""
                 )
             }
         )
@@ -95,8 +103,8 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
                 FlashCardEntity(
                     sessionId = sessionId,
                     deckName = title,
-                    front = card["front"]?.toString() ?: "",
-                    back = card["back"]?.toString() ?: "",
+                    front = card["front"] as? String ?: "",
+                    back = card["back"] as? String ?: "",
                     tags = "",
                     nextReview = now,
                     createdAt = now
