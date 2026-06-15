@@ -31,6 +31,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    // Room KSP: register TypeConverters so processor sees them
+    ksp {
+        arg("room.typeConverters", "com.tmrisdaone.studybuddy.data.local.TypeConverters")
+    }
 }
 
 dependencies {
