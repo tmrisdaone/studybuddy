@@ -4,6 +4,7 @@ import androidx.room.*
 import com.tmrisdaone.studybuddy.domain.*
 import kotlinx.datetime.Instant
 
+@TypeConverters(TypeConverters::class)
 @Entity(tableName = "study_sessions")
 data class StudySessionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -16,6 +17,7 @@ data class StudySessionEntity(
     val createdAt: Instant
 )
 
+@TypeConverters(TypeConverters::class)
 @Entity(tableName = "flashcards")
 data class FlashCardEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -30,6 +32,7 @@ data class FlashCardEntity(
     val createdAt: Instant
 )
 
+@TypeConverters(TypeConverters::class)
 @Entity(tableName = "quizzes")
 data class QuizEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -52,6 +55,7 @@ data class QuizQuestionEntity(
     val explanation: String
 )
 
+@TypeConverters(TypeConverters::class)
 @Entity(tableName = "documents")
 data class DocumentEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -62,6 +66,7 @@ data class DocumentEntity(
     val createdAt: Instant
 )
 
+@TypeConverters(TypeConverters::class)
 @Entity(tableName = "chat_messages")
 data class ChatMessageEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
