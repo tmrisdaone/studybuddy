@@ -61,9 +61,9 @@ dependencies {
     ksp("com.google.dagger:hilt-android-compiler:2.50")
 
     // Room
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-runtime:2.7.0-alpha02")
+    implementation("androidx.room:room-ktx:2.7.0-alpha02")
+    ksp("androidx.room:room-compiler:2.7.0-alpha02")
 
     // Network
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
