@@ -1,6 +1,7 @@
 package com.tmrisdaone.studybuddy.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,12 +30,16 @@ fun StudyBuddyNavHost(settingsViewModel: SettingsViewModel, chatViewModel: ChatV
         }
         composable("settings") {
             SettingsScreen(
-                viewModel = settingsViewModel,
-                onNavigateBack = { nav.popBackStack() }
+                groqKey = settingsViewModel.groqKey.value,
+                onKeyChange = settingsViewModel::setGroqKey,
+                sttModel = settingsViewModel.sttModel.value,
+                onSttChange = settingsViewModel::setSttModel,
+                llmModel = settingsViewModel.llmModel.value,
+                onLlmChange = settingsViewModel::setLlmModel
             )
         }
         composable("history") {
-            HistoryScreen(emptyList())
+            HistoryScreen(sessions = emptyList())
         }
         composable("scanner") {
             ScannerScreen(onDocumentScanned = { nav.popBackStack() })

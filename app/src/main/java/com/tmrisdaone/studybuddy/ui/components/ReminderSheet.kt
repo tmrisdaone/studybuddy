@@ -1,5 +1,10 @@
 package com.tmrisdaone.studybuddy.ui.components
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -8,20 +13,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.app.PendingIntentCompat
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReminderOptionsSheet(
     sheetState: SheetState,
     showReminderSheet: MutableState<Boolean>,
-    context: android.content.Context,
-    scope: androidx.compose.runtime.CoroutineScope
+    context: Context,
+    scope: CoroutineScope
 ) {
     val options = listOf(
-        "1 Day Before" to 1L * 24 * 60 * 60 * 1000,
-        "1 Hour Before" to 1L * 60 * 60 * 1000,
-        "15 Minutes Before" to 15L * 60 * 1000,
+        "1 Day Before" to (1L * 24 * 60 * 60 * 1000),
+        "1 Hour Before" to (1L * 60 * 60 * 1000),
+        "15 Minutes Before" to (15L * 60 * 1000),
         "No Reminder" to 0L
     )
 
@@ -42,22 +50,24 @@ fun ReminderOptionsSheet(
                     trailingContent = if (offset == 0L) {
                         Icon(Icons.Default.Check, contentDescription = null)
                     } else null,
-                    modifier = Modifier.clickable {
-                        showReminderSheet.value = false
-                        scope.launch {
-                            val alarmManager = context.getSystemService(android.app.AlarmManager::class.java)
-                            val intent = android.content.Intent(context, com.tmrisdaone.studybuddy.receiver.ReminderReceiver::class.java).apply {
-                                putExtra("title", "Study Reminder")
-                                putExtra("message", "Time to study!")
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showReminderSheet.value = false
+                            scope.launch {
+                                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                                val intent = Intent(context, com.tmrisdaone.studybuddy.receiver.ReminderReceiver::class.java).apply {
+                                    putExtra("title", "Study Reminder")
+                                    putExtra("message", "Time to study!")
+                                }
+                                val pendingIntent = PendingIntentCompat.getBroadcast(
+                                    context, 0, intent,
+                                    PendingIntentCompat.FLAG_IMMUTABLE
+                                )
+                                val triggerAt = System.currentTimeMillis() + offset
+                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
                             }
-                            val pendingIntent = androidx.core.app.PendingIntentCompat.getBroadcast(
-                                context, 0, intent,
-                                androidx.core.app.PendingIntentCompat.FLAG_IMMUTABLE
-                            )
-                            val triggerAt = System.currentTimeMillis() + offset
-                            alarmManager?.setExact(android.app.AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
                         }
-                    }
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
