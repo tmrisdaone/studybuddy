@@ -1,6 +1,7 @@
 package com.tmrisdaone.studybuddy.data.local
 
 import androidx.room.*
+import com.tmrisdaone.studybuddy.domain.*
 import kotlinx.datetime.Instant
 
 @Entity(tableName = "study_sessions")
@@ -68,4 +69,66 @@ data class ChatMessageEntity(
     val role: String, // user, assistant
     val content: String,
     val createdAt: Instant
+)
+
+// Extension functions for Entity -> Domain mapping
+fun StudySessionEntity.toDomain(): StudySession = StudySession(
+    id = id,
+    type = type,
+    title = title,
+    summary = summary,
+    inputType = inputType,
+    sourceUri = sourceUri,
+    modelUsed = modelUsed,
+    createdAt = createdAt
+)
+
+fun FlashCardEntity.toDomain(): FlashCard = FlashCard(
+    id = id,
+    sessionId = sessionId,
+    deckName = deckName,
+    front = front,
+    back = back,
+    tags = tags,
+    easeFactor = easeFactor,
+    intervalDays = intervalDays,
+    nextReview = nextReview,
+    createdAt = createdAt
+)
+
+fun DocumentEntity.toDomain(): Document = Document(
+    id = id,
+    name = name,
+    mimeType = mimeType,
+    sizeBytes = sizeBytes,
+    textContent = textContent,
+    createdAt = createdAt
+)
+
+fun ChatMessageEntity.toDomain(): ChatMessage = ChatMessage(
+    id = id,
+    sessionId = sessionId,
+    role = role,
+    content = content,
+    createdAt = createdAt
+)
+
+fun QuizEntity.toDomain() = Quiz(
+    id = id,
+    sessionId = sessionId,
+    title = title,
+    questionCount = questionCount,
+    createdAt = createdAt
+)
+
+fun QuizQuestionEntity.toDomain() = QuizQuestion(
+    id = id,
+    quizId = quizId,
+    questionText = questionText,
+    optionA = optionA,
+    optionB = optionB,
+    optionC = optionC,
+    optionD = optionD,
+    correctAnswer = correctAnswer,
+    explanation = explanation
 )
