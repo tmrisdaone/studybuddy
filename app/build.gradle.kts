@@ -50,8 +50,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.compose.foundation:foundation-text")
-    implementation("androidx.compose.runtime:runtime")
+    // foundation-text and runtime are included in BOM transitively
     
     // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.8.0")
