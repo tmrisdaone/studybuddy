@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.spacer
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -27,16 +29,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.MaterialTheme
 import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.ImeAction
 
 @Composable
 fun SettingsScreen(
@@ -51,15 +48,16 @@ fun SettingsScreen(
     val availableModels = viewModel.getAvailableModels()
     val isSaving by viewModel.isSaving.observeAsState(false)
     val saveResult by viewModel.saveResult.observeAsState<String?>(null)
+    val colors = MaterialTheme.colorScheme
     
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text("Settings", fontWeight = FontWeight.Bold) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = StudyBuddyTheme.colorScheme.surfaceContainer),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.surfaceContainer),
             navigationIcon = {
                 IconButton(onClick = onNavigateToChat) {
                     Icon(
-                        painter = androidx.compose.material.icons.Icons.Filled.ArrowBack,
+                        painter = Icons.Filled.ArrowBack,
                         contentDescription = "Back"
                     )
                 }
@@ -75,31 +73,31 @@ fun SettingsScreen(
             // API Key Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = StudyBuddyTheme.colorScheme.surfaceContainer)
+                colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Groq API Key", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = StudyBuddyTheme.colorScheme.onSurface)
-                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+                    Text("Groq API Key", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
                     
-                    OutlinedTextField(
+                    androidx.compose.material3.TextField(
                         value = apiKey,
                         onValueChange = { apiKey = it },
                         label = { Text("Enter your Groq API Key") },
                         placeholder = { Text("sk-...") },
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         modifier = Modifier.fillMaxWidth(),
                         isError = apiKey.isNotBlank() && !apiKey.startsWith("sk-"),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = StudyBuddyTheme.colorScheme.primary,
-                            unfocusedBorderColor = StudyBuddyTheme.colorScheme.outline,
-                            labelColor = StudyBuddyTheme.colorScheme.onSurfaceVariant
+                        colors = androidx.compose.material3.TextFieldDefaults.textFieldColors(
+                            focusedBorderColor = colors.primary,
+                            unfocusedBorderColor = colors.outline,
+                            labelColor = colors.onSurfaceVariant,
+                            containerColor = colors.surface
                         )
                     )
                     
-                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
                     
-                    androidx.compose.material3.Button(
+                    Button(
                         onClick = {
                             if (apiKey.isNotBlank()) {
                                 viewModel.saveApiKey(apiKey)
@@ -109,9 +107,9 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         if (isSaving) {
-                            androidx.compose.material3.CircularProgressIndicator(
+                            CircularProgressIndicator(
                                 modifier = Modifier.size(20.dp),
-                                color = StudyBuddyTheme.colorScheme.onPrimary
+                                color = colors.onPrimary
                             )
                         } else {
                             Text("Save API Key")
@@ -123,13 +121,14 @@ fun SettingsScreen(
             // Model Selection Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = StudyBuddyTheme.colorScheme.surfaceContainer)
+                colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Model", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = StudyBuddyTheme.colorScheme.onSurface)
-                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+                    Text("Model", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
                     
-                    ExposedDropdownMenuBox(
+                    // Simple dropdown using ExposedDropdownMenuBox
+                    androidx.compose.material3.ExposedDropdownMenuBox(
                         expanded = expanded,
                         onExpandedChange = { expanded = it }
                     ) {
@@ -141,25 +140,26 @@ fun SettingsScreen(
                             trailingIcon = {
                                 Icon(
                                     painter = if (expanded) 
-                                        androidx.compose.material.icons.Icons.Filled.KeyboardArrowUp 
+                                        Icons.Filled.KeyboardArrowUp 
                                     else 
-                                        androidx.compose.material.icons.Icons.Filled.KeyboardArrowDown,
+                                        Icons.Filled.KeyboardArrowDown,
                                     contentDescription = "Expand"
                                 )
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = TextFieldDefaults.textFieldColors(
-                                focusedBorderColor = StudyBuddyTheme.colorScheme.primary,
-                                unfocusedBorderColor = StudyBuddyTheme.colorScheme.outline
+                            colors = androidx.compose.material3.TextFieldDefaults.textFieldColors(
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.outline,
+                                containerColor = colors.surface
                             )
                         )
                         
-                        DropdownMenu(
+                        androidx.compose.material3.DropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }
                         ) {
                             availableModels.forEach { model ->
-                                DropdownMenuItem(
+                                androidx.compose.material3.DropdownMenuItem(
                                     onClick = {
                                         viewModel.setModel(model)
                                         expanded = false
@@ -168,7 +168,7 @@ fun SettingsScreen(
                                 ) {
                                     Text(
                                         text = model,
-                                        color = if (model == selectedModel) StudyBuddyTheme.colorScheme.primary else StudyBuddyTheme.colorScheme.onSurface
+                                        color = if (model == selectedModel) colors.primary else colors.onSurface
                                     )
                                 }
                             }
@@ -180,35 +180,35 @@ fun SettingsScreen(
             // Status Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = StudyBuddyTheme.colorScheme.surfaceContainer)
+                colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Status", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = StudyBuddyTheme.colorScheme.onSurface)
-                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+                    Text("Status", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
                     
                     if (savedApiKey.isNotBlank()) {
                         androidx.compose.foundation.layout.Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("API Key: Configured", color = StudyBuddyTheme.colorScheme.onSurface)
-                            androidx.compose.material3.Icon(
-                                painter = androidx.compose.material.icons.Icons.Filled.CheckCircle,
+                            Text("API Key: Configured", color = colors.onSurface)
+                            Icon(
+                                painter = Icons.Filled.CheckCircle,
                                 contentDescription = "Configured",
-                                tint = StudyBuddyTheme.colorScheme.primary
+                                tint = colors.primary
                             )
                         }
                     } else {
-                        Text("API Key: Not configured", color = StudyBuddyTheme.colorScheme.onSurfaceVariant)
+                        Text("API Key: Not configured", color = colors.onSurfaceVariant)
                     }
                     
-                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(8.dp))
                     
                     androidx.compose.foundation.layout.Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Model: $selectedModel", color = StudyBuddyTheme.colorScheme.onSurface)
+                        Text("Model: $selectedModel", color = colors.onSurface)
                     }
                 }
             }
@@ -221,17 +221,17 @@ fun SettingsScreen(
                         .padding(top = 8.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if (result.contains("Failed")) 
-                            StudyBuddyTheme.colorScheme.errorContainer 
+                            colors.errorContainer 
                         else 
-                            StudyBuddyTheme.colorScheme.tertiaryContainer
+                            colors.tertiaryContainer
                     )
                 ) {
                     Text(
                         result,
                         color = if (result.contains("Failed")) 
-                            StudyBuddyTheme.colorScheme.onErrorContainer 
+                            colors.onErrorContainer 
                         else 
-                            StudyBuddyTheme.colorScheme.onTertiaryContainer,
+                            colors.onTertiaryContainer,
                         modifier = Modifier.padding(16.dp)
                     )
                 }

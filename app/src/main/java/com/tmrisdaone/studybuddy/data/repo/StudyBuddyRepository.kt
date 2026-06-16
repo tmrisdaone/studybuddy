@@ -56,7 +56,11 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
         val session = db.studySessionDao().getSync(sessionId)
         if (session != null) {
             db.studySessionDao().insert(
-                session.copy(summary = response.take(200))
+                session.copy(
+                    summary = response.take(200),
+                    sourceUri = session.sourceUri,
+                    modelUsed = model
+                )
             )
         }
         return response
@@ -96,7 +100,10 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
             StudySessionEntity(
                 type = "flashcards",
                 title = title,
+                summary = null,
                 inputType = "text",
+                sourceUri = null,
+                modelUsed = null,
                 createdAt = Clock.System.now().toEpochMilliseconds()
             )
         )
@@ -134,7 +141,10 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
             StudySessionEntity(
                 type = type,
                 title = title,
+                summary = null,
                 inputType = inputType,
+                sourceUri = null,
+                modelUsed = null,
                 createdAt = Clock.System.now().toEpochMilliseconds()
             )
         )

@@ -12,7 +12,6 @@ import com.tmrisdaone.studybuddy.ui.viewmodels.ChatViewModel
 import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
 import com.tmrisdaone.studybuddy.ui.viewmodels.HistoryViewModel
 import com.tmrisdaone.studybuddy.ui.viewmodels.ScannerViewModel
-import hj.ictrl.hilt.android.AndroidEntryPoint
 
 // Note: Using manual ViewModel factories since Hilt doesn't work in Termux/proot
 class MainActivity : ComponentActivity() {
@@ -20,7 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             StudyBuddyTheme {
-                val db = StudyBuddyDatabase.getInstance(this@MainActivity)
+                val db = StudyBuddyDatabase.get(this@MainActivity)
                 val repo = StudyBuddyRepository(db, this@MainActivity)
                 
                 val chatViewModel = ChatViewModel(repo)

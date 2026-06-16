@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -26,8 +27,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material.icons.filled.Style
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.MaterialTheme
 import com.tmrisdaone.studybuddy.domain.StudySession
-import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
 import com.tmrisdaone.studybuddy.ui.viewmodels.HistoryViewModel
 import kotlinx.datetime.format.DateTimeFormatter
 import kotlinx.datetime.format.Companion.custom
@@ -39,15 +50,16 @@ fun HistoryScreen(
 ) {
     val sessions by viewModel.sessions.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
+    val colors = MaterialTheme.colorScheme
     
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text("History", fontWeight = FontWeight.Bold) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = StudyBuddyTheme.colorScheme.surfaceContainer),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.surfaceContainer),
             navigationIcon = {
                 IconButton(onClick = onNavigateToChat) {
                     Icon(
-                        painter = androidx.compose.material.icons.Icons.Filled.ArrowBack,
+                        painter = Icons.Filled.ArrowBack,
                         contentDescription = "Back"
                     )
                 }
@@ -55,7 +67,7 @@ fun HistoryScreen(
             actions = {
                 IconButton(onClick = { viewModel.refresh() }, enabled = !isLoading) {
                     Icon(
-                        painter = androidx.compose.material.icons.Icons.Filled.Refresh,
+                        painter = Icons.Filled.Refresh,
                         contentDescription = "Refresh"
                     )
                 }
@@ -72,21 +84,21 @@ fun HistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Icon(
-                        painter = androidx.compose.material.icons.Icons.Filled.History,
+                        painter = Icons.Filled.History,
                         contentDescription = "",
                         modifier = Modifier.size(64.dp),
-                        tint = StudyBuddyTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        tint = colors.onSurfaceVariant.copy(alpha = 0.5f)
                     )
                     Text(
                         "No study sessions yet",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
-                        color = StudyBuddyTheme.colorScheme.onSurfaceVariant
+                        color = colors.onSurfaceVariant
                     )
                     Text(
                         "Start chatting or scanning to create sessions",
                         fontSize = 14.sp,
-                        color = StudyBuddyTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        color = colors.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 }
             }
@@ -109,7 +121,7 @@ fun HistoryScreen(
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                androidx.compose.material3.CircularProgressIndicator()
+                CircularProgressIndicator()
             }
         }
     }
@@ -118,34 +130,35 @@ fun HistoryScreen(
 @Composable
 fun SessionCard(session: StudySession) {
     val typeIcon = when (session.type) {
-        "chat" -> androidx.compose.material.icons.Icons.Filled.Chat
-        "pdf" -> androidx.compose.material.icons.Icons.Filled.PictureAsPdf
-        "youtube" -> androidx.compose.material.icons.Icons.Filled.PlayCircle
-        "scan" -> androidx.compose.material.icons.Icons.Filled.DocumentScanner
-        "flashcards" -> androidx.compose.material.icons.Icons.Filled.Style
-        else -> androidx.compose.material.icons.Icons.Filled.Folder
+        "chat" -> Icons.Filled.Chat
+        "pdf" -> Icons.Filled.PictureAsPdf
+        "youtube" -> Icons.Filled.PlayCircle
+        "scan" -> Icons.Filled.DocumentScanner
+        "flashcards" -> Icons.Filled.Style
+        else -> Icons.Filled.Folder
     }
     
     val formatter = DateTimeFormatter.ofPattern("MMM d, HH:mm")
     val dateStr = session.createdAt.format(formatter)
+    val colors = MaterialTheme.colorScheme
     
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = StudyBuddyTheme.colorScheme.surfaceContainer
+            containerColor = colors.surfaceContainer
         )
     ) {
         androidx.compose.foundation.layout.Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            androidx.compose.material3.Icon(
+            Icon(
                 painter = typeIcon,
                 contentDescription = session.type,
                 modifier = Modifier.size(24.dp),
-                tint = StudyBuddyTheme.colorScheme.primary
+                tint = colors.primary
             )
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(12.dp))
+            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.width(12.dp))
             androidx.compose.foundation.layout.Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -156,7 +169,7 @@ fun SessionCard(session: StudySession) {
                     text = session.title,
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
-                    color = StudyBuddyTheme.colorScheme.onSurface,
+                    color = colors.onSurface,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.TextOverflow.Ellipsis
                 )
@@ -166,24 +179,24 @@ fun SessionCard(session: StudySession) {
                     Text(
                         text = session.type.capitalize(),
                         fontSize = 12.sp,
-                        color = StudyBuddyTheme.colorScheme.onSurfaceVariant
+                        color = colors.onSurfaceVariant
                     )
                     Text(
                         text = "•",
                         fontSize = 12.sp,
-                        color = StudyBuddyTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        color = colors.onSurfaceVariant.copy(alpha = 0.5f)
                     )
                     Text(
                         text = dateStr,
                         fontSize = 12.sp,
-                        color = StudyBuddyTheme.colorScheme.onSurfaceVariant
+                        color = colors.onSurfaceVariant
                     )
                 }
                 session.summary?.let { summary ->
                     Text(
                         text = summary,
                         fontSize = 13.sp,
-                        color = StudyBuddyTheme.colorScheme.onSurfaceVariant,
+                        color = colors.onSurfaceVariant,
                         maxLines = 2,
                         overflow = androidx.compose.ui.text.TextOverflow.Ellipsis
                     )

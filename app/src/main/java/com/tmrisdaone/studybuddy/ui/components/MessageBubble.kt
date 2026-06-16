@@ -1,6 +1,5 @@
 package com.tmrisdaone.studybuddy.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,11 +19,12 @@ import androidx.compose.ui.text.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tmrisdaone.studybuddy.domain.ChatMessage
-import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun MessageBubble(message: ChatMessage) {
     val isUser = message.role == "user"
+    val colors = MaterialTheme.colorScheme
     
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -33,9 +33,9 @@ fun MessageBubble(message: ChatMessage) {
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = if (isUser) 
-                    StudyBuddyTheme.colorScheme.primary 
+                    colors.primary 
                 else 
-                    StudyBuddyTheme.colorScheme.surfaceContainerHighest
+                    colors.surfaceContainerHighest
             ),
             shape = RoundedCornerShape(
                 topStart = 20.dp,
@@ -50,9 +50,9 @@ fun MessageBubble(message: ChatMessage) {
             Text(
                 text = message.content,
                 color = if (isUser) 
-                    StudyBuddyTheme.colorScheme.onPrimary 
+                    colors.onPrimary 
                 else 
-                    StudyBuddyTheme.colorScheme.onSurface,
+                    colors.onSurface,
                 fontSize = 15.sp,
                 modifier = Modifier.padding(16.dp),
                 textAlign = TextAlign.Start

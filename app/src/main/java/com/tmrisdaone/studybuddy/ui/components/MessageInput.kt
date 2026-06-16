@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun MessageInput(
@@ -43,11 +43,12 @@ fun MessageInput(
     isLoading: Boolean
 ) {
     var text by remember { mutableStateOf(messageText) }
+    val colors = MaterialTheme.colorScheme
     
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = StudyBuddyTheme.colorScheme.surfaceContainer
+            containerColor = colors.surfaceContainer
         ),
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
     ) {
@@ -63,7 +64,7 @@ fun MessageInput(
                     .fillMaxWidth()
                     .height(48.dp)
                     .background(
-                        color = StudyBuddyTheme.colorScheme.surface,
+                        color = colors.surface,
                         shape = RoundedCornerShape(24.dp)
                     )
             ) {
@@ -73,7 +74,7 @@ fun MessageInput(
                         text = newText
                         onTextChange(newText)
                     },
-                    placeholder = { Text("Type a message...", color = StudyBuddyTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)) },
+                    placeholder = { Text("Type a message...", color = colors.onSurfaceVariant.copy(alpha = 0.7f)) },
                     singleLine = false,
                     maxLines = 4,
                     keyboardOptions = KeyboardOptions(
@@ -89,9 +90,9 @@ fun MessageInput(
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
-                        cursorColor = StudyBuddyTheme.colorScheme.primary,
-                        textColor = StudyBuddyTheme.colorScheme.onSurface,
-                        placeholderColor = StudyBuddyTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        cursorColor = colors.primary,
+                        textColor = colors.onSurface,
+                        placeholderColor = colors.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 )
             }
@@ -102,13 +103,13 @@ fun MessageInput(
                 shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (text.isNotBlank() && !isLoading) 
-                        StudyBuddyTheme.colorScheme.primary 
+                        colors.primary 
                     else 
-                        StudyBuddyTheme.colorScheme.surfaceContainerHighest,
+                        colors.surfaceContainerHighest,
                     contentColor = if (text.isNotBlank() && !isLoading) 
-                        StudyBuddyTheme.colorScheme.onPrimary 
+                        colors.onPrimary 
                     else 
-                        StudyBuddyTheme.colorScheme.onSurfaceVariant
+                        colors.onSurfaceVariant
                 ),
                 modifier = Modifier.size(48.dp)
             ) {
@@ -116,9 +117,9 @@ fun MessageInput(
                     painter = Icons.Filled.Send,
                     contentDescription = "Send",
                     tint = if (text.isNotBlank() && !isLoading) 
-                        StudyBuddyTheme.colorScheme.onPrimary 
+                        colors.onPrimary 
                     else 
-                        StudyBuddyTheme.colorScheme.onSurfaceVariant
+                        colors.onSurfaceVariant
                 )
             }
         }

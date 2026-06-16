@@ -1,5 +1,6 @@
 package com.tmrisdaone.studybuddy.ui.screens
 
+import androidx.activity.compose.rememberCoroutineScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -27,18 +29,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.px
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.DocumentScanner
 import com.tmrisdaone.studybuddy.domain.ChatMessage
 import com.tmrisdaone.studybuddy.ui.components.MessageBubble
 import com.tmrisdaone.studybuddy.ui.components.MessageInput
-import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
 import com.tmrisdaone.studybuddy.ui.viewmodels.ChatViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun ChatScreen(
@@ -61,11 +65,11 @@ fun ChatScreen(
     ) {
         TopAppBar(
             title = { Text("StudyBuddy Chat", fontWeight = FontWeight.Bold) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = StudyBuddyTheme.colorScheme.surfaceContainer),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
             navigationIcon = {
                 IconButton(onClick = onNavigateToHistory) {
                     Icon(
-                        painter = androidx.compose.material.icons.Icons.Filled.History,
+                        painter = Icons.Filled.History,
                         contentDescription = "History"
                     )
                 }
@@ -73,13 +77,13 @@ fun ChatScreen(
             actions = {
                 IconButton(onClick = onNavigateToScanner) {
                     Icon(
-                        painter = androidx.compose.material.icons.Icons.Filled.DocumentScanner,
+                        painter = Icons.Filled.DocumentScanner,
                         contentDescription = "Scanner"
                     )
                 }
                 IconButton(onClick = onNavigateToSettings) {
                     Icon(
-                        painter = androidx.compose.material.icons.Icons.Filled.Settings,
+                        painter = Icons.Filled.Settings,
                         contentDescription = "Settings"
                     )
                 }
@@ -102,7 +106,7 @@ fun ChatScreen(
                         "Start a conversation\nTap the scanner to capture text",
                         textAlign = androidx.compose.ui.text.TextAlign.Center,
                         fontSize = 16.sp,
-                        color = StudyBuddyTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else {
@@ -117,7 +121,7 @@ fun ChatScreen(
                     }
                     item {
                         if (isLoading) {
-                            androidx.compose.material3.CircularProgressIndicator(
+                            CircularProgressIndicator(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp)
@@ -133,12 +137,12 @@ fun ChatScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = StudyBuddyTheme.colorScheme.errorContainer
+                        containerColor = MaterialTheme.colorScheme.errorContainer
                     )
                 ) {
                     Text(
                         err,
-                        color = StudyBuddyTheme.colorScheme.onErrorContainer,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.padding(16.dp)
                     )
                 }

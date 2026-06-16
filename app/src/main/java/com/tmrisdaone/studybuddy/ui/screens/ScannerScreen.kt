@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.spacer
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -28,7 +30,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material3.MaterialTheme
 import com.tmrisdaone.studybuddy.ui.viewmodels.ScannerViewModel
 
 @Composable
@@ -39,17 +46,18 @@ fun ScannerScreen(
     val scannedText by viewModel.scannedText.observeAsState("")
     val isScanning by viewModel.isScanning.observeAsState(false)
     val error by viewModel.error.observeAsState<String?>(null)
+    val colors = MaterialTheme.colorScheme
     
     var showText by remember { mutableStateOf(false) }
     
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text("Scanner", fontWeight = FontWeight.Bold) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = StudyBuddyTheme.colorScheme.surfaceContainer),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.surfaceContainer),
             navigationIcon = {
                 IconButton(onClick = onNavigateToChat) {
                     Icon(
-                        painter = androidx.compose.material.icons.Icons.Filled.ArrowBack,
+                        painter = Icons.Filled.ArrowBack,
                         contentDescription = "Back"
                     )
                 }
@@ -68,7 +76,7 @@ fun ScannerScreen(
                     .fillMaxWidth()
                     .aspectRatio(1f)
                     .background(
-                        color = StudyBuddyTheme.colorScheme.surfaceContainer,
+                        color = colors.surfaceContainer,
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -82,14 +90,14 @@ fun ScannerScreen(
                             text = "Scanned Text",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
-                            color = StudyBuddyTheme.colorScheme.onSurface
+                            color = colors.onSurface
                         )
-                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
-                        androidx.compose.material3.Text(
+                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                        Text(
                             text = scannedText,
                             maxLines = 10,
                             overflow = androidx.compose.ui.text.TextOverflow.Ellipsis,
-                            color = StudyBuddyTheme.colorScheme.onSurface
+                            color = colors.onSurface
                         )
                     }
                 } else {
@@ -98,21 +106,21 @@ fun ScannerScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Icon(
-                            painter = androidx.compose.material.icons.Icons.Filled.DocumentScanner,
+                            painter = Icons.Filled.DocumentScanner,
                             contentDescription = "",
                             modifier = Modifier.size(64.dp),
-                            tint = StudyBuddyTheme.colorScheme.primary.copy(alpha = 0.7f)
+                            tint = colors.primary.copy(alpha = 0.7f)
                         )
                         Text(
                             text = "Camera Scanner",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Medium,
-                            color = StudyBuddyTheme.colorScheme.onSurface
+                            color = colors.onSurface
                         )
                         Text(
                             text = "Point camera at text to scan",
                             fontSize = 14.sp,
-                            color = StudyBuddyTheme.colorScheme.onSurfaceVariant
+                            color = colors.onSurfaceVariant
                         )
                     }
                 }
@@ -130,9 +138,9 @@ fun ScannerScreen(
                     modifier = Modifier.fillMaxWidth().width(280.dp)
                 ) {
                     if (isScanning) {
-                        androidx.compose.material3.CircularProgressIndicator(
+                        CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
-                            color = StudyBuddyTheme.colorScheme.onPrimary
+                            color = colors.onPrimary
                         )
                     } else {
                         androidx.compose.foundation.layout.Row(
@@ -140,10 +148,10 @@ fun ScannerScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                painter = androidx.compose.material.icons.Icons.Filled.CameraAlt,
+                                painter = Icons.Filled.CameraAlt,
                                 contentDescription = ""
                             )
-                            androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
+                            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.width(8.dp))
                             Text("Scan with Camera")
                         }
                     }
@@ -159,10 +167,10 @@ fun ScannerScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painter = androidx.compose.material.icons.Icons.Filled.PhotoLibrary,
+                            painter = Icons.Filled.PhotoLibrary,
                             contentDescription = ""
                         )
-                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
+                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.width(8.dp))
                         Text("Pick from Gallery")
                     }
                 }
@@ -177,8 +185,8 @@ fun ScannerScreen(
                     enabled = !scannedText.isBlank() && !isScanning,
                     modifier = Modifier.fillMaxWidth().width(280.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = StudyBuddyTheme.colorScheme.secondaryContainer,
-                        contentColor = StudyBuddyTheme.colorScheme.onSecondaryContainer
+                        containerColor = colors.secondaryContainer,
+                        contentColor = colors.onSecondaryContainer
                     )
                 ) {
                     Text(if (showText) "Hide Result" else "View Result")
@@ -191,8 +199,8 @@ fun ScannerScreen(
                         },
                         modifier = Modifier.fillMaxWidth().width(280.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = StudyBuddyTheme.colorScheme.tertiaryContainer,
-                            contentColor = StudyBuddyTheme.colorScheme.onTertiaryContainer
+                            containerColor = colors.tertiaryContainer,
+                            contentColor = colors.onTertiaryContainer
                         )
                     ) {
                         Text("Send to Chat")
@@ -204,23 +212,23 @@ fun ScannerScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth().width(280.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = StudyBuddyTheme.colorScheme.errorContainer
+                        containerColor = colors.errorContainer
                     )
                 ) {
                     Text(
                         err,
-                        color = StudyBuddyTheme.colorScheme.onErrorContainer,
+                        color = colors.onErrorContainer,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
             }
             
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
+            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(16.dp))
             
             Text(
                 text = "Note: Camera integration requires CameraX + ML Kit setup",
                 fontSize = 12.sp,
-                color = StudyBuddyTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                color = colors.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = androidx.compose.ui.text.TextAlign.Center
             )
         }
