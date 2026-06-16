@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.spacer
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -92,7 +95,7 @@ fun ScannerScreen(
                             fontSize = 18.sp,
                             color = colors.onSurface
                         )
-                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                        Spacer(modifier = height(12.dp))
                         Text(
                             text = scannedText,
                             maxLines = 10,
@@ -135,7 +138,9 @@ fun ScannerScreen(
                 Button(
                     onClick = { viewModel.scanFromCamera() },
                     enabled = !isScanning,
-                    modifier = Modifier.fillMaxWidth().width(280.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .width(280.dp)
                 ) {
                     if (isScanning) {
                         CircularProgressIndicator(
@@ -151,7 +156,7 @@ fun ScannerScreen(
                                 painter = Icons.Filled.CameraAlt,
                                 contentDescription = ""
                             )
-                            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.width(8.dp))
+                            Spacer(modifier = width(8.dp))
                             Text("Scan with Camera")
                         }
                     }
@@ -160,7 +165,9 @@ fun ScannerScreen(
                 Button(
                     onClick = { viewModel.scanFromGallery() },
                     enabled = !isScanning,
-                    modifier = Modifier.fillMaxWidth().width(280.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .width(280.dp)
                 ) {
                     androidx.compose.foundation.layout.Row(
                         horizontalArrangement = Arrangement.Center,
@@ -170,7 +177,7 @@ fun ScannerScreen(
                             painter = Icons.Filled.PhotoLibrary,
                             contentDescription = ""
                         )
-                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.width(8.dp))
+                        Spacer(modifier = width(8.dp))
                         Text("Pick from Gallery")
                     }
                 }
@@ -183,7 +190,9 @@ fun ScannerScreen(
                         }
                     },
                     enabled = !scannedText.isBlank() && !isScanning,
-                    modifier = Modifier.fillMaxWidth().width(280.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .width(280.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colors.secondaryContainer,
                         contentColor = colors.onSecondaryContainer
@@ -197,7 +206,9 @@ fun ScannerScreen(
                         onClick = {
                             // TODO: Send scanned text to chat
                         },
-                        modifier = Modifier.fillMaxWidth().width(280.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .width(280.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colors.tertiaryContainer,
                             contentColor = colors.onTertiaryContainer
@@ -210,7 +221,9 @@ fun ScannerScreen(
             
             error?.let { err ->
                 Card(
-                    modifier = Modifier.fillMaxWidth().width(280.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .width(280.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = colors.errorContainer
                     )
@@ -223,7 +236,7 @@ fun ScannerScreen(
                 }
             }
             
-            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(16.dp))
+            Spacer(modifier = height(16.dp))
             
             Text(
                 text = "Note: Camera integration requires CameraX + ML Kit setup",

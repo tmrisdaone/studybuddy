@@ -7,7 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.spacer
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -40,8 +41,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.domain.StudySession
 import com.tmrisdaone.studybuddy.ui.viewmodels.HistoryViewModel
+import kotlinx.datetime.Instant
 import kotlinx.datetime.format.DateTimeFormatter
-import kotlinx.datetime.format.Companion.custom
+import kotlinx.datetime.format.format
 
 @Composable
 fun HistoryScreen(
@@ -158,7 +160,7 @@ fun SessionCard(session: StudySession) {
                 modifier = Modifier.size(24.dp),
                 tint = colors.primary
             )
-            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.width(12.dp))
+            Spacer(modifier = width(12.dp))
             androidx.compose.foundation.layout.Column(
                 modifier = Modifier
                     .fillMaxWidth()

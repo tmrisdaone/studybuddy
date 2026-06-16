@@ -79,14 +79,14 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
         val questions = parseQuizJson(response)
         db.quizDao().insertQuestions(
             questions.mapIndexed { idx, q ->
-                val options = (q["options"] as? List<*>) ?: emptyList()
+                val options = (q["options"] as? List<String>) ?: emptyList()
                 QuizQuestionEntity(
                     quizId = quizId,
                     questionText = q["question"] as? String ?: "",
-                    optionA = (options.getOrNull(0) as? String) ?: "",
-                    optionB = (options.getOrNull(1) as? String) ?: "",
-                    optionC = (options.getOrNull(2) as? String) ?: "",
-                    optionD = (options.getOrNull(3) as? String) ?: "",
+                    optionA = options.getOrNull(0) ?: "",
+                    optionB = options.getOrNull(1) ?: "",
+                    optionC = options.getOrNull(2) ?: "",
+                    optionD = options.getOrNull(3) ?: "",
                     correctAnswer = (q["correct"] as? Number)?.toInt() ?: 0,
                     explanation = q["explanation"] as? String ?: ""
                 )

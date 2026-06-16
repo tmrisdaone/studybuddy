@@ -7,7 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.spacer
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -79,7 +80,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Groq API Key", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                    Spacer(modifier = height(12.dp))
                     
                     androidx.compose.material3.TextField(
                         value = apiKey,
@@ -92,12 +93,11 @@ fun SettingsScreen(
                         colors = androidx.compose.material3.TextFieldDefaults.textFieldColors(
                             focusedBorderColor = colors.primary,
                             unfocusedBorderColor = colors.outline,
-                            labelColor = colors.onSurfaceVariant,
                             containerColor = colors.surface
                         )
                     )
                     
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                    Spacer(modifier = height(12.dp))
                     
                     Button(
                         onClick = {
@@ -127,7 +127,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Model", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                    Spacer(modifier = height(12.dp))
                     
                     // Simple dropdown using ExposedDropdownMenuBox
                     androidx.compose.material3.ExposedDropdownMenuBox(
@@ -186,7 +186,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Status", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                    Spacer(modifier = height(12.dp))
                     
                     if (savedApiKey.isNotBlank()) {
                         androidx.compose.foundation.layout.Row(
@@ -204,7 +204,7 @@ fun SettingsScreen(
                         Text("API Key: Not configured", color = colors.onSurfaceVariant)
                     }
                     
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(8.dp))
+                    Spacer(modifier = height(8.dp))
                     
                     androidx.compose.foundation.layout.Row(
                         modifier = Modifier.fillMaxWidth(),

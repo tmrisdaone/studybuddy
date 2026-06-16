@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tmrisdaone.studybuddy.data.repo.StudyBuddyRepository
 import com.tmrisdaone.studybuddy.domain.StudySession
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class HistoryViewModel(private val repo: StudyBuddyRepository) : ViewModel() {
     
