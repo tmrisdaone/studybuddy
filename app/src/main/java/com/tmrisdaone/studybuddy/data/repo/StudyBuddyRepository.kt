@@ -14,10 +14,15 @@ import org.json.JSONArray
 
 class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val context: Context) {
     private val scraper = ProotScraper()
-    private val groq: GroqClient by lazy {
-        val key = db.preferenceDao().get("groq_api_key") ?: ""
-        GroqClient(key)
-    }
+    private var _groq: GroqClient? = null
+    private val groq: GroqClient
+        get() {
+            if (_groq == null) {
+                val key = db.preferenceDao().getSync("groq_api_key") ?: ""
+                _groq = GroqClient(key)
+            }
+            return _groq!!
+        }
 
     val sessions: Flow<List<StudySession>> =
         db.studySessionDao().getAll().map { it.map { s -> s.toDomain() } }
@@ -48,7 +53,7 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
         db.chatMessageDao().insert(
             ChatMessageEntity(sessionId = sessionId, role = "assistant", content = response, createdAt = now)
         )
-        val session = db.studySessionDao().get(sessionId)
+        val session = db.studySessionDao().getSync(sessionId)
         if (session != null) {
             db.studySessionDao().insert(
                 session.copy(summary = response.take(200))
@@ -112,6 +117,16 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
             )
         }
         return deckId
+    }
+
+    suspend fun getApiKey(): String? {
+        return db.preferenceDao().getSync("groq_api_key")
+    }
+
+    suspend fun saveApiKey(key: String) {
+        db.preferenceDao().put(PreferenceEntity("groq_api_key", key))
+        // Reset GroqClient so it picks up the new key
+        _groq = null
     }
 
     suspend fun createSession(type: String, title: String, inputType: String): Long {

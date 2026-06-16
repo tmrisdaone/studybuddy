@@ -3,32 +3,37 @@ package com.tmrisdaone.studybuddy
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tmrisdaone.studybuddy.data.local.StudyBuddyDatabase
+import com.tmrisdaone.studybuddy.data.repo.StudyBuddyRepository
 import com.tmrisdaone.studybuddy.ui.navigation.StudyBuddyNavHost
 import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
-import com.tmrisdaone.studybuddy.ui.viewmodels.*
-import dagger.hilt.android.AndroidEntryPoint
+import com.tmrisdaone.studybuddy.ui.viewmodels.ChatViewModel
+import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
+import com.tmrisdaone.studybuddy.ui.viewmodels.HistoryViewModel
+import com.tmrisdaone.studybuddy.ui.viewmodels.ScannerViewModel
+import hj.ictrl.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
+// Note: Using manual ViewModel factories since Hilt doesn't work in Termux/proot
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             StudyBuddyTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    val settingsVm: SettingsViewModel = viewModel(factory = SettingsViewModel.factory((application as StudyBuddyApp).database))
-val chatVm: ChatViewModel = viewModel(factory = ChatViewModel.factory((application as StudyBuddyApp).database, this@MainActivity))
-StudyBuddyNavHost(settingsViewModel = settingsVm, chatViewModel = chatVm)
-                }
+                val db = StudyBuddyDatabase.getInstance(this@MainActivity)
+                val repo = StudyBuddyRepository(db, this@MainActivity)
+                
+                val chatViewModel = ChatViewModel(repo)
+                val settingsViewModel = SettingsViewModel(repo)
+                val historyViewModel = HistoryViewModel(repo)
+                val scannerViewModel = ScannerViewModel(repo)
+                
+                StudyBuddyNavHost(
+                    chatViewModel = chatViewModel,
+                    settingsViewModel = settingsViewModel,
+                    historyViewModel = historyViewModel,
+                    scannerViewModel = scannerViewModel
+                )
             }
         }
     }

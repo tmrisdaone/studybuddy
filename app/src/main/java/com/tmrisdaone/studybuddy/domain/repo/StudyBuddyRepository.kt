@@ -10,4 +10,6 @@ interface StudyBuddyRepository {
     suspend fun scrapeYoutube(videoId: String): String
     suspend fun chat(sessionId: Long, userMsg: String, systemPrompt: String, model: String): String
     suspend fun generateQuiz(sessionId: Long, context: String, title: String): Long
+    suspend fun getApiKey(): String?
+    suspend fun saveApiKey(key: String)
 }

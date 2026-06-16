@@ -11,6 +11,9 @@ interface StudySessionDao {
     @Query("SELECT * FROM study_sessions WHERE id = :id")
     suspend fun get(id: Long): StudySessionEntity?
 
+    @Query("SELECT * FROM study_sessions WHERE id = :id")
+    fun getSync(id: Long): StudySessionEntity?
+
     @Insert
     suspend fun insert(session: StudySessionEntity): Long
 }

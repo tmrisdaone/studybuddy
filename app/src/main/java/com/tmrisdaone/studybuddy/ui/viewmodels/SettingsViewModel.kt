@@ -2,49 +2,64 @@ package com.tmrisdaone.studybuddy.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tmrisdaone.studybuddy.data.local.StudyBuddyDatabase
+import com.tmrisdaone.studybuddy.data.repo.StudyBuddyRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val db: StudyBuddyDatabase) : ViewModel() {
-    private val _groqKey = MutableStateFlow("")
-    val groqKey: StateFlow<String> = _groqKey.asStateFlow()
-
-    private val _sttModel = MutableStateFlow("whisper-large-v3-turbo")
-    val sttModel: StateFlow<String> = _sttModel.asStateFlow()
-
-    private val _llmModel = MutableStateFlow("llama-3.1-8b-instant")
-    val llmModel: StateFlow<String> = _llmModel.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            _groqKey.value = db.preferenceDao().get("groq_api_key") ?: ""
-            _sttModel.value = db.preferenceDao().get("stt_model") ?: "whisper-large-v3-turbo"
-            _llmModel.value = db.preferenceDao().get("llm_model") ?: "llama-3.1-8b-instant"
+class SettingsViewModel(private val repo: StudyBuddyRepository) : ViewModel() {
+    
+    private val _apiKey = MutableStateFlow("")
+    val apiKey = _apiKey.asStateFlow()
+    
+    private val _selectedModel = MutableStateFlow("llama-3.1-8b-instant")
+    val selectedModel = _selectedModel.asStateFlow()
+    
+    private val _isSaving = MutableStateFlow(false)
+    val isSaving = _isSaving.asStateFlow()
+    
+    private val _saveResult = MutableStateFlow<String?>(null)
+    val saveResult = _saveResult.asStateFlow()
+    
+    private val availableModels = listOf(
+        "llama-3.1-8b-instant",
+        "llama-3.1-70b-versatile",
+        "mixtral-8x7b-32768",
+        "gemma2-9b-it"
+    )
+    
+    fun getAvailableModels() = availableModels
+    
+    fun loadApiKey() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val key = repo.getApiKey()
+            _apiKey.value = key ?: ""
         }
     }
-
-    fun setGroqKey(key: String) {
-        _groqKey.value = key
-        viewModelScope.launch { db.preferenceDao().put(com.tmrisdaone.studybuddy.data.local.PreferenceEntity("groq_api_key", key)) }
-    }
-
-    fun setSttModel(model: String) {
-        _sttModel.value = model
-        viewModelScope.launch { db.preferenceDao().put(com.tmrisdaone.studybuddy.data.local.PreferenceEntity("stt_model", model)) }
-    }
-
-    fun setLlmModel(model: String) {
-        _llmModel.value = model
-        viewModelScope.launch { db.preferenceDao().put(com.tmrisdaone.studybuddy.data.local.PreferenceEntity("llm_model", model)) }
-    }
-
-    companion object {
-        fun factory(db: StudyBuddyDatabase) = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = SettingsViewModel(db) as T
+    
+    fun saveApiKey(key: String) {
+        _isSaving.value = true
+        _saveResult.value = null
+        
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repo.saveApiKey(key)
+                _apiKey.value = key
+                _saveResult.value = "API key saved successfully"
+            } catch (e: Exception) {
+                _saveResult.value = "Failed to save: ${e.message}"
+            } finally {
+                _isSaving.value = false
+            }
         }
+    }
+    
+    fun setModel(model: String) {
+        _selectedModel.value = model
+    }
+    
+    fun clearResult() {
+        _saveResult.value = null
     }
 }

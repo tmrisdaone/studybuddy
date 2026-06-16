@@ -14,9 +14,12 @@ interface PreferenceDao {
     @Query("SELECT value FROM preferences WHERE key = :key")
     suspend fun get(key: String): String?
 
-    @Query("SELECT * FROM preferences")
-    fun getAll(): Flow<List<PreferenceEntity>>
+    @Query("SELECT value FROM preferences WHERE key = :key")
+    fun getSync(key: String): String?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun put(pref: PreferenceEntity)
+
+    @Query("SELECT * FROM preferences")
+    fun getAll(): Flow<List<PreferenceEntity>>
 }

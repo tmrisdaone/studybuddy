@@ -1,123 +1,166 @@
 package com.tmrisdaone.studybuddy.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.spacer
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.px
 import com.tmrisdaone.studybuddy.domain.ChatMessage
+import com.tmrisdaone.studybuddy.ui.components.MessageBubble
+import com.tmrisdaone.studybuddy.ui.components.MessageInput
+import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
+import com.tmrisdaone.studybuddy.ui.viewmodels.ChatViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    messages: List<ChatMessage>,
-    sessionId: Long,
-    onSend: (String) -> Unit,
-    onGenerateQuiz: () -> Unit,
-    onGenerateFlashcards: () -> Unit,
-    onSummarize: () -> Unit = {},
-    isLoading: Boolean = false
+    viewModel: ChatViewModel,
+    onNavigateToHistory: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToScanner: () -> Unit
 ) {
-    var input by remember { mutableStateOf("") }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.weight(1f).fillMaxWidth().padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            reverseLayout = true
-        ) {
-            item {
-                if (isLoading) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                            Text(text = "Thinking...", modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                }
-            }
-            items(messages.reversed()) { msg ->
-                val isUser = msg.role == "user"
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
-                ) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(
-                                text = msg.content,
-                                color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                            )
-                            if (!isUser) {
-                                Text(
-                                    text = msg.content.takeLast(20),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        Surface(tonalElevation = 3.dp) {
-            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        AssistChip(onClick = onGenerateQuiz, label = { Text("Quiz") }, leadingIcon = { Icon(Icons.Default.Quiz, null, modifier = Modifier.size(16.dp)) })
-                        AssistChip(onClick = onGenerateFlashcards, label = { Text("Flash") }, leadingIcon = { Icon(Icons.Default.Style, null, modifier = Modifier.size(16.dp)) })
-                        AssistChip(onClick = onSummarize, label = { Text("Summarize") }, leadingIcon = { Icon(Icons.Default.ShortText, null, modifier = Modifier.size(16.dp)) })
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = input,
-                        onValueChange = { input = it },
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text("Say something...") },
-                        enabled = !isLoading,
-                        colors = OutlinedTextFieldDefaults.colors(),
-                        minLines = 1,
-                        maxLines = 4
+    var messageText by remember { mutableStateOf("") }
+    val messages by viewModel.messages.observeAsState(emptyList())
+    val isLoading by viewModel.isLoading.observeAsState(false)
+    val error by viewModel.error.observeAsState<String?>(null)
+    
+    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        TopAppBar(
+            title = { Text("StudyBuddy Chat", fontWeight = FontWeight.Bold) },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = StudyBuddyTheme.colorScheme.surfaceContainer),
+            navigationIcon = {
+                IconButton(onClick = onNavigateToHistory) {
+                    Icon(
+                        painter = androidx.compose.material.icons.Icons.Filled.History,
+                        contentDescription = "History"
                     )
-
-                    FloatingActionButton(
-                        onClick = {
-                            if (input.isNotBlank()) {
-                                onSend(input)
-                                input = ""
-                            }
-                        },
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ) {
-                        Icon(Icons.Default.Send, "Send", tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+            },
+            actions = {
+                IconButton(onClick = onNavigateToScanner) {
+                    Icon(
+                        painter = androidx.compose.material.icons.Icons.Filled.DocumentScanner,
+                        contentDescription = "Scanner"
+                    )
+                }
+                IconButton(onClick = onNavigateToSettings) {
+                    Icon(
+                        painter = androidx.compose.material.icons.Icons.Filled.Settings,
+                        contentDescription = "Settings"
+                    )
+                }
+            }
+        )
+        
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 0.dp, bottom = 0.dp)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (messages.isEmpty()) {
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Start a conversation\nTap the scanner to capture text",
+                        textAlign = androidx.compose.ui.text.TextAlign.Center,
+                        fontSize = 16.sp,
+                        color = StudyBuddyTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                androidx.compose.foundation.lazy.LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    reverseLayout = true
+                ) {
+                    items(messages.reversed()) { message ->
+                        MessageBubble(message = message)
+                    }
+                    item {
+                        if (isLoading) {
+                            androidx.compose.material3.CircularProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            )
+                        }
                     }
                 }
             }
+            
+            error?.let { err ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = StudyBuddyTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        err,
+                        color = StudyBuddyTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
         }
+        
+        MessageInput(
+            messageText = messageText,
+            onTextChange = { messageText = it },
+            onSend = {
+                if (messageText.isNotBlank() && !isLoading) {
+                    val systemPrompt = "You are a helpful study assistant. Provide clear, concise explanations."
+                    val model = "llama-3.1-8b-instant"
+                    viewModel.sendMessage(messageText, systemPrompt, model)
+                    messageText = ""
+                    coroutineScope.launch {
+                        kotlinx.coroutines.delay(100)
+                        scrollState.animateScrollTo(0)
+                    }
+                }
+            },
+            isLoading = isLoading
+        )
     }
 }

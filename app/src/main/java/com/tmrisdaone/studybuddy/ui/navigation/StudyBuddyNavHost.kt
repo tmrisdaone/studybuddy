@@ -1,48 +1,61 @@
 package com.tmrisdaone.studybuddy.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.tmrisdaone.studybuddy.ui.screens.*
-import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
+import com.tmrisdaone.studybuddy.ui.screens.ChatScreen
+import com.tmrisdaone.studybuddy.ui.screens.HistoryScreen
+import com.tmrisdaone.studybuddy.ui.screens.ScannerScreen
+import com.tmrisdaone.studybuddy.ui.screens.SettingsScreen
 import com.tmrisdaone.studybuddy.ui.viewmodels.ChatViewModel
+import com.tmrisdaone.studybuddy.ui.viewmodels.HistoryViewModel
+import com.tmrisdaone.studybuddy.ui.viewmodels.ScannerViewModel
+import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
 
 @Composable
-fun StudyBuddyNavHost(settingsViewModel: SettingsViewModel, chatViewModel: ChatViewModel) {
-    val nav = rememberNavController()
-    val msgs by chatViewModel.messages.collectAsState(emptyList())
-    val sid by chatViewModel.sessionId.collectAsState(0L)
-    val loading by chatViewModel.isLoading.collectAsState(false)
-
-    NavHost(navController = nav, startDestination = "chat") {
+fun StudyBuddyNavHost(
+    chatViewModel: ChatViewModel,
+    settingsViewModel: SettingsViewModel,
+    historyViewModel: HistoryViewModel,
+    scannerViewModel: ScannerViewModel
+) {
+    val navController = rememberNavController()
+    val startDestination = remember { mutableStateOf("chat") }
+    
+    NavHost(navController, startDestination = startDestination.value) {
         composable("chat") {
             ChatScreen(
-                messages = msgs,
-                sessionId = sid,
-                isLoading = loading,
-                onSend = chatViewModel::send,
-                onGenerateQuiz = chatViewModel::generateQuiz,
-                onGenerateFlashcards = chatViewModel::generateFlashcards,
-                onSummarize = chatViewModel::summarize
+                viewModel = chatViewModel,
+                onNavigateToHistory = { startDestination.value = "history" },
+                onNavigateToSettings = { startDestination.value = "settings" },
+                onNavigateToScanner = { startDestination.value = "scanner" }
+            )
+        }
+        composable("history") {
+            HistoryScreen(
+                viewModel = historyViewModel,
+                onNavigateToChat = { startDestination.value = "chat" }
+            )
+        }
+        composable("scanner") {
+            ScannerScreen(
+                viewModel = scannerViewModel,
+                onNavigateToChat = { startDestination.value = "chat" }
             )
         }
         composable("settings") {
             SettingsScreen(
-                groqKey = settingsViewModel.groqKey.value,
-                onKeyChange = settingsViewModel::setGroqKey,
-                sttModel = settingsViewModel.sttModel.value,
-                onSttChange = settingsViewModel::setSttModel,
-                llmModel = settingsViewModel.llmModel.value,
-                onLlmChange = settingsViewModel::setLlmModel
+                viewModel = settingsViewModel,
+                onNavigateToChat = { startDestination.value = "chat" }
             )
-        }
-        composable("history") {
-            HistoryScreen(sessions = emptyList())
-        }
-        composable("scanner") {
-            ScannerScreen(onDocumentScanned = { nav.popBackStack() })
         }
     }
 }
