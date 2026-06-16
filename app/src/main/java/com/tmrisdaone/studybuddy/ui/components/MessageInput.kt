@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -91,8 +90,7 @@ fun MessageInput(
                         unfocusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
                         cursorColor = colors.primary,
-                        textColor = colors.onSurface,
-                        placeholderColor = colors.onSurfaceVariant.copy(alpha = 0.7f)
+                        textColor = colors.onSurface
                     )
                 )
             }

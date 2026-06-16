@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -16,6 +14,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -32,8 +31,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.MaterialTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
@@ -44,11 +41,9 @@ fun SettingsScreen(
     onNavigateToChat: () -> Unit
 ) {
     var apiKey by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
     
     val savedApiKey by viewModel.apiKey.collectAsStateWithLifecycle("")
     val selectedModel by viewModel.selectedModel.collectAsStateWithLifecycle("llama-3.1-8b-instant")
-    val availableModels = viewModel.getAvailableModels()
     val isSaving by viewModel.isSaving.collectAsStateWithLifecycle(false)
     val saveResult by viewModel.saveResult.collectAsStateWithLifecycle<String?>(null)
     val colors = MaterialTheme.colorScheme
@@ -80,9 +75,9 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Groq API Key", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
-                    Spacer(modifier = height(12.dp))
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
                     
-                    androidx.compose.material3.TextField(
+                    TextField(
                         value = apiKey,
                         onValueChange = { apiKey = it },
                         label = { Text("Enter your Groq API Key") },
@@ -95,7 +90,7 @@ fun SettingsScreen(
                         )
                     )
                     
-                    Spacer(modifier = height(12.dp))
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
                     
                     Button(
                         onClick = {
@@ -118,60 +113,18 @@ fun SettingsScreen(
                 }
             }
             
-            // Model Selection Section
+            // Model Selection - simple text display
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Model", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
-                    Spacer(modifier = height(12.dp))
-                    
-                    // Simple dropdown using ExposedDropdownMenuBox
-                    androidx.compose.material3.ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it }
-                    ) {
-                        androidx.compose.material3.TextField(
-                            value = selectedModel,
-                            onValueChange = { /* handled by menu */ },
-                            label = { Text("Select Model") },
-                            readOnly = true,
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = if (expanded) 
-                                        Icons.Filled.KeyboardArrowUp 
-                                    else 
-                                        Icons.Filled.KeyboardArrowDown,
-                                    contentDescription = "Expand"
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = androidx.compose.material3.TextFieldDefaults.textFieldColors(
-                                containerColor = colors.surface
-                            )
-                        )
-                        
-                        androidx.compose.material3.DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            availableModels.forEach { model ->
-                                androidx.compose.material3.DropdownMenuItem(
-                                    onClick = {
-                                        viewModel.setModel(model)
-                                        expanded = false
-                                    },
-                                    enabled = true
-                                ) {
-                                    Text(
-                                        text = model,
-                                        color = if (model == selectedModel) colors.primary else colors.onSurface
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(8.dp))
+                    Text("Current: $selectedModel", color = colors.onSurfaceVariant)
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(4.dp))
+                    Text("Available: llama-3.1-8b-instant, llama-3.1-70b-versatile, mixtral-8x7b-32768, gemma2-9b-it",
+                         color = colors.onSurfaceVariant.copy(alpha = 0.7f), fontSize = 12.sp)
                 }
             }
             
@@ -182,7 +135,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Status", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
-                    Spacer(modifier = height(12.dp))
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
                     
                     if (savedApiKey.isNotBlank()) {
                         androidx.compose.foundation.layout.Row(
@@ -200,7 +153,7 @@ fun SettingsScreen(
                         Text("API Key: Not configured", color = colors.onSurfaceVariant)
                     }
                     
-                    Spacer(modifier = height(8.dp))
+                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(8.dp))
                     
                     androidx.compose.foundation.layout.Row(
                         modifier = Modifier.fillMaxWidth(),
