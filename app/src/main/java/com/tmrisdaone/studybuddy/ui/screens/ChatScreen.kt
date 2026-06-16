@@ -70,7 +70,7 @@ fun ChatScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateToHistory) {
                     Icon(
-                        painter = Icons.Filled.History,
+                        imageVector = Icons.Filled.History,
                         contentDescription = "History"
                     )
                 }
@@ -78,13 +78,13 @@ fun ChatScreen(
             actions = {
                 IconButton(onClick = onNavigateToScanner) {
                     Icon(
-                        painter = Icons.Filled.DocumentScanner,
+                        imageVector = Icons.Filled.DocumentScanner,
                         contentDescription = "Scanner"
                     )
                 }
                 IconButton(onClick = onNavigateToSettings) {
                     Icon(
-                        painter = Icons.Filled.Settings,
+                        imageVector = Icons.Filled.Settings,
                         contentDescription = "Settings"
                     )
                 }

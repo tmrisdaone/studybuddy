@@ -60,7 +60,7 @@ fun SettingsScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateToChat) {
                     Icon(
-                        painter = Icons.Filled.ArrowBack,
+                        imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back"
                     )
                 }
@@ -91,8 +91,6 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         isError = apiKey.isNotBlank() && !apiKey.startsWith("sk-"),
                         colors = androidx.compose.material3.TextFieldDefaults.textFieldColors(
-                            focusedBorderColor = colors.primary,
-                            unfocusedBorderColor = colors.outline,
                             containerColor = colors.surface
                         )
                     )
@@ -141,7 +139,7 @@ fun SettingsScreen(
                             readOnly = true,
                             trailingIcon = {
                                 Icon(
-                                    painter = if (expanded) 
+                                    imageVector = if (expanded) 
                                         Icons.Filled.KeyboardArrowUp 
                                     else 
                                         Icons.Filled.KeyboardArrowDown,
@@ -150,8 +148,6 @@ fun SettingsScreen(
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = androidx.compose.material3.TextFieldDefaults.textFieldColors(
-                                focusedBorderColor = colors.primary,
-                                unfocusedBorderColor = colors.outline,
                                 containerColor = colors.surface
                             )
                         )
@@ -195,7 +191,7 @@ fun SettingsScreen(
                         ) {
                             Text("API Key: Configured", color = colors.onSurface)
                             Icon(
-                                painter = Icons.Filled.CheckCircle,
+                                imageVector = Icons.Filled.CheckCircle,
                                 contentDescription = "Configured",
                                 tint = colors.primary
                             )

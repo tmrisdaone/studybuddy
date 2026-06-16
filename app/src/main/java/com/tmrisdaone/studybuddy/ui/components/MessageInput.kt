@@ -114,7 +114,7 @@ fun MessageInput(
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
-                    painter = Icons.Filled.Send,
+                    imageVector = Icons.Filled.Send,
                     contentDescription = "Send",
                     tint = if (text.isNotBlank() && !isLoading) 
                         colors.onPrimary 

@@ -61,7 +61,7 @@ fun HistoryScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateToChat) {
                     Icon(
-                        painter = Icons.Filled.ArrowBack,
+                        imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back"
                     )
                 }
@@ -69,7 +69,7 @@ fun HistoryScreen(
             actions = {
                 IconButton(onClick = { viewModel.refresh() }, enabled = !isLoading) {
                     Icon(
-                        painter = Icons.Filled.Refresh,
+                        imageVector = Icons.Filled.Refresh,
                         contentDescription = "Refresh"
                     )
                 }
@@ -86,7 +86,7 @@ fun HistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Icon(
-                        painter = Icons.Filled.History,
+                        imageVector = Icons.Filled.History,
                         contentDescription = "",
                         modifier = Modifier.size(64.dp),
                         tint = colors.onSurfaceVariant.copy(alpha = 0.5f)
@@ -155,7 +155,7 @@ fun SessionCard(session: StudySession) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = typeIcon,
+                imageVector = typeIcon,
                 contentDescription = session.type,
                 modifier = Modifier.size(24.dp),
                 tint = colors.primary

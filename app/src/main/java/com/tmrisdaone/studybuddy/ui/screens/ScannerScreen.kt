@@ -60,7 +60,7 @@ fun ScannerScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateToChat) {
                     Icon(
-                        painter = Icons.Filled.ArrowBack,
+                        imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back"
                     )
                 }
@@ -109,7 +109,7 @@ fun ScannerScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Icon(
-                            painter = Icons.Filled.DocumentScanner,
+                            imageVector = Icons.Filled.DocumentScanner,
                             contentDescription = "",
                             modifier = Modifier.size(64.dp),
                             tint = colors.primary.copy(alpha = 0.7f)
@@ -153,7 +153,7 @@ fun ScannerScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                painter = Icons.Filled.CameraAlt,
+                                imageVector = Icons.Filled.CameraAlt,
                                 contentDescription = ""
                             )
                             Spacer(modifier = width(8.dp))
@@ -174,7 +174,7 @@ fun ScannerScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painter = Icons.Filled.PhotoLibrary,
+                            imageVector = Icons.Filled.PhotoLibrary,
                             contentDescription = ""
                         )
                         Spacer(modifier = width(8.dp))
