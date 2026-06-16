@@ -50,7 +50,10 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material")
     implementation("androidx.compose.material:material-icons-extended")
-    // foundation-text and runtime are included in BOM transitively
+    
+    // Explicit foundation dependencies for TextAlign, TextOverflow, KeyboardOptions, etc.
+    implementation("androidx.compose.foundation:foundation:1.6.0")
+    implementation("androidx.compose.foundation:foundation-layout:1.6.0")
     
     // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.8.0")
