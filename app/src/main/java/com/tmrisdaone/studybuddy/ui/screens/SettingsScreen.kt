@@ -19,7 +19,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,7 +31,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.MaterialTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
 
 @Composable
@@ -43,11 +45,11 @@ fun SettingsScreen(
     var apiKey by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     
-    val savedApiKey by viewModel.apiKey.observeAsState("")
-    val selectedModel by viewModel.selectedModel.observeAsState("llama-3.1-8b-instant")
+    val savedApiKey by viewModel.apiKey.collectAsStateWithLifecycle("")
+    val selectedModel by viewModel.selectedModel.collectAsStateWithLifecycle("llama-3.1-8b-instant")
     val availableModels = viewModel.getAvailableModels()
-    val isSaving by viewModel.isSaving.observeAsState(false)
-    val saveResult by viewModel.saveResult.observeAsState<String?>(null)
+    val isSaving by viewModel.isSaving.collectAsStateWithLifecycle(false)
+    val saveResult by viewModel.saveResult.collectAsStateWithLifecycle<String?>(null)
     val colors = MaterialTheme.colorScheme
     
     Column(modifier = Modifier.fillMaxSize()) {

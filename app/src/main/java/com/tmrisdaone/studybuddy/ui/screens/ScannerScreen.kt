@@ -20,7 +20,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,6 +35,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material3.MaterialTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.ui.viewmodels.ScannerViewModel
 
 @Composable
@@ -43,9 +43,9 @@ fun ScannerScreen(
     viewModel: ScannerViewModel,
     onNavigateToChat: () -> Unit
 ) {
-    val scannedText by viewModel.scannedText.observeAsState("")
-    val isScanning by viewModel.isScanning.observeAsState(false)
-    val error by viewModel.error.observeAsState<String?>(null)
+    val scannedText by viewModel.scannedText.collectAsStateWithLifecycle("")
+    val isScanning by viewModel.isScanning.collectAsStateWithLifecycle(false)
+    val error by viewModel.error.collectAsStateWithLifecycle<String?>(null)
     val colors = MaterialTheme.colorScheme
     
     var showText by remember { mutableStateOf(false) }

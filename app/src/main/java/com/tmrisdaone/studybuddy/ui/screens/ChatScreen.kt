@@ -22,7 +22,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,6 +35,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.domain.ChatMessage
 import com.tmrisdaone.studybuddy.ui.components.MessageBubble
 import com.tmrisdaone.studybuddy.ui.components.MessageInput
@@ -52,9 +52,9 @@ fun ChatScreen(
     onNavigateToScanner: () -> Unit
 ) {
     var messageText by remember { mutableStateOf("") }
-    val messages by viewModel.messages.observeAsState(emptyList())
-    val isLoading by viewModel.isLoading.observeAsState(false)
-    val error by viewModel.error.observeAsState<String?>(null)
+    val messages by viewModel.messages.collectAsStateWithLifecycle(emptyList())
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle(false)
+    val error by viewModel.error.collectAsStateWithLifecycle<String?>(null)
     
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
