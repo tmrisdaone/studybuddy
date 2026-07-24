@@ -2,33 +2,46 @@ package com.tmrisdaone.studybuddy.data.repo
 
 import android.content.Context
 import com.tmrisdaone.studybuddy.data.local.*
-import com.tmrisdaone.studybuddy.data.remote.GroqClient
+import com.tmrisdaone.studybuddy.data.remote.ChatGateway
 import com.tmrisdaone.studybuddy.data.remote.ProotScraper
 import com.tmrisdaone.studybuddy.domain.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import org.json.JSONArray
 
-class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val context: Context) {
+class StudyBuddyRepository(
+    private val db: StudyBuddyDatabase,
+    private val context: Context,
+    private val providerStore: ProviderStore = ProviderStore(db.preferenceDao()),
+    private val gateway: ChatGateway = ChatGateway()
+) {
     private val scraper = ProotScraper()
-    private var _groq: GroqClient? = null
-    private val groq: GroqClient
-        get() {
-            if (_groq == null) {
-                val key = db.preferenceDao().getSync("groq_api_key") ?: ""
-                _groq = GroqClient(key)
-            }
-            return _groq!!
-        }
 
     val sessions: Flow<List<StudySession>> =
         db.studySessionDao().getAll().map { it.map { s -> s.toDomain() } }
 
     val documents: Flow<List<Document>> =
         db.documentDao().getAll().map { it.map { d -> d.toDomain() } }
+
+    val providers: StateFlow<List<ApiProvider>> = providerStore.providers
+    val activeProviderId: StateFlow<String?> = providerStore.activeId
+
+    suspend fun initProviders() = providerStore.load()
+
+    fun activeProvider(): ApiProvider? = providerStore.active()
+    suspend fun setActiveProvider(id: String) = providerStore.setActive(id)
+    suspend fun addProvider(p: ApiProvider) = providerStore.add(p)
+    suspend fun updateProvider(id: String, transform: (ApiProvider) -> ApiProvider) =
+        providerStore.update(id, transform)
+    suspend fun deleteProvider(id: String) = providerStore.delete(id)
+    suspend fun listModels(provider: ApiProvider): List<ModelInfo> = gateway.listModels(provider)
+    suspend fun testConnection(provider: ApiProvider): Boolean = gateway.testConnection(provider)
 
     fun flashcards(sessionId: Long): Flow<List<FlashCard>> =
         db.flashCardDao().getBySession(sessionId).map { it.map { c -> c.toDomain() } }
@@ -37,15 +50,17 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
 
     suspend fun scrapeYoutube(videoId: String): String = scraper.fetchYoutube(videoId)
 
-    suspend fun summarizeText(text: String, model: String = "llama-3.1-8b-instant"): String {
+    suspend fun summarizeText(text: String, model: String): String {
+        val provider = activeProvider() ?: error("No active API provider configured")
         val system = "Summarize the following text concisely for a student."
-        return groq.chat(system, text.take(4000), model)
+        return gateway.chat(provider, system, text.take(4000), model)
     }
 
     suspend fun extractPdfText(localPath: String): String = scraper.fetchPdfText(localPath)
 
     suspend fun chat(sessionId: Long, userMsg: String, systemPrompt: String, model: String): String {
-        val response = groq.chat(systemPrompt, userMsg, model)
+        val provider = activeProvider() ?: error("No active API provider configured")
+        val response = gateway.chat(provider, systemPrompt, userMsg, model)
         val now = Clock.System.now().toEpochMilliseconds()
         db.chatMessageDao().insert(
             ChatMessageEntity(sessionId = sessionId, role = "user", content = userMsg, createdAt = now)
@@ -66,7 +81,13 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
         return response
     }
 
+    fun chatStream(systemPrompt: String, userMsg: String, model: String): Flow<String> {
+        val provider = activeProvider() ?: error("No active API provider configured")
+        return gateway.chatStream(provider, systemPrompt, userMsg, model)
+    }
+
     suspend fun generateQuiz(sessionId: Long, context: String, title: String): Long {
+        val provider = activeProvider() ?: error("No active API provider configured")
         val quizId = db.quizDao().insertQuiz(
             QuizEntity(
                 sessionId = sessionId,
@@ -75,7 +96,19 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
                 createdAt = Clock.System.now().toEpochMilliseconds()
             )
         )
-        val response = groq.generateQuiz(context)
+        val response = withContext(Dispatchers.IO) {
+            gateway.chat(
+                provider,
+                "You are a study assistant. Generate 5 multiple choice questions based on the provided context.",
+                buildString {
+                    appendLine("Create a quiz from this material:\n")
+                    appendLine(context.take(12000))
+                    appendLine("\nFormat per question as JSON array of objects with keys: question, options [A-D], correct (0-3), explanation.")
+                    appendLine("Return ONLY pure JSON array.")
+                },
+                provider.defaultModel.ifBlank { "llama-3.1-8b-instant" }
+            )
+        }
         val questions = parseQuizJson(response)
         db.quizDao().insertQuestions(
             questions.mapIndexed { idx, q ->
@@ -96,6 +129,7 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
     }
 
     suspend fun generateFlashcards(sessionId: Long, context: String, title: String, count: Int = 10): Long {
+        val provider = activeProvider() ?: error("No active API provider configured")
         val deckId = db.studySessionDao().insert(
             StudySessionEntity(
                 type = "flashcards",
@@ -107,9 +141,20 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
                 createdAt = Clock.System.now().toEpochMilliseconds()
             )
         )
-        val raw = groq.generateFlashcards(context, count)
-        val cards = parseFlashcards(raw)
-        cards.forEach { card ->
+        val raw = withContext(Dispatchers.IO) {
+            gateway.chat(
+                provider,
+                "You are a study assistant. Generate $count flashcards from the context.",
+                buildString {
+                    appendLine("Create flashcards from this material:\n")
+                    appendLine(context.take(12000))
+                    appendLine("\nFormat as JSON array of objects: {front: String, back: String}.")
+                    appendLine("Return ONLY pure JSON array.")
+                },
+                provider.defaultModel.ifBlank { "llama-3.1-8b-instant" }
+            )
+        }
+        parseFlashcards(raw).forEach { card ->
             val now = Clock.System.now().toEpochMilliseconds()
             db.flashCardDao().insert(
                 FlashCardEntity(
@@ -126,14 +171,11 @@ class StudyBuddyRepository(private val db: StudyBuddyDatabase, private val conte
         return deckId
     }
 
-    suspend fun getApiKey(): String? {
-        return db.preferenceDao().getSync("groq_api_key")
-    }
-
+    // Legacy single-key helpers retained for SettingsViewModel compatibility.
+    suspend fun getApiKey(): String? = activeProvider()?.apiKey
     suspend fun saveApiKey(key: String) {
-        db.preferenceDao().put(PreferenceEntity("groq_api_key", key))
-        // Reset GroqClient so it picks up the new key
-        _groq = null
+        val active = activeProvider() ?: return
+        providerStore.update(active.id) { it.copy(apiKey = key) }
     }
 
     suspend fun createSession(type: String, title: String, inputType: String): Long {
