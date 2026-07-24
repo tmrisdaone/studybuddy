@@ -3,7 +3,7 @@ package com.tmrisdaone.studybuddy
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.tmrisdaone.studybuddy.ui.navigation.StudyBuddyNavHost
 import com.tmrisdaone.studybuddy.ui.theme.StudyBuddyTheme
 import com.tmrisdaone.studybuddy.ui.viewmodels.ChatViewModel
