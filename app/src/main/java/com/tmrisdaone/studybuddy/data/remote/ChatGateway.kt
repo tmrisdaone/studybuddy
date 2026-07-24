@@ -4,6 +4,7 @@ import com.tmrisdaone.studybuddy.domain.ApiProvider
 import com.tmrisdaone.studybuddy.domain.ModelInfo
 import com.tmrisdaone.studybuddy.domain.ProviderType
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
@@ -15,7 +16,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okio.bufferedSource
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -45,7 +45,7 @@ class ChatGateway {
         model: String
     ): String = withContext(Dispatchers.IO) {
         val payload = buildChatPayload(provider, system, user, model, stream = false)
-        val req = buildRequest(provider, payload, stream = false)
+        val req = buildRequest(provider, payload.toRequestBody(JSON), stream = false)
         http.newCall(req).execute().use { r ->
             if (!r.isSuccessful) {
                 throw IOException(describeError(provider, r))
@@ -74,7 +74,7 @@ class ChatGateway {
         model: String
     ): Flow<String> = callbackFlow {
         val payload = buildChatPayload(provider, system, user, model, stream = true)
-        val req = buildRequest(provider, payload, stream = true)
+        val req = buildRequest(provider, payload.toRequestBody(JSON), stream = true)
 
         val call = http.newCall(req)
         call.enqueue(object : Callback {
@@ -90,7 +90,8 @@ class ChatGateway {
                     return
                 }
                 try {
-                    response.body!!.bufferedSource().use { source ->
+                    response.body.use { b ->
+                        val source = b.source()
                         while (!source.exhausted()) {
                             val line = source.readUtf8Line() ?: break
                             if (line.isBlank() || !line.startsWith("data:")) continue
@@ -203,10 +204,12 @@ class ChatGateway {
         }
     }
 
-    private fun parseDelta(data: String): String? = try {
-        val obj = JSONObject(data)
-        val choices = obj.optJSONArray("choices") ?: return null
-        if (choices.length() == 0) return null
-        choices.getJSONObject(0).optJSONObject("delta")?.optString("content")
-    } catch (_: Exception) { null }
+    private fun parseDelta(data: String): String? {
+        return try {
+            val obj = JSONObject(data)
+            val choices = obj.optJSONArray("choices") ?: return null
+            if (choices.length() == 0) return null
+            choices.getJSONObject(0).optJSONObject("delta")?.optString("content")
+        } catch (_: Exception) { null }
+    }
 }

@@ -153,4 +153,29 @@ class SettingsViewModel @Inject constructor(private val repo: StudyBuddyReposito
 
     fun clearSaveResult() { _saveResult.value = null }
     fun clearConnectionStatus() { _connectionStatus.value = null }
+
+    /**
+     * Legacy single-key entrypoint used by the Settings "Active API Key" card.
+     * Writes the key onto the currently active provider.
+     */
+    fun saveApiKey(key: String) {
+        val active = repo.activeProvider()
+        if (active == null) {
+            _saveResult.value = "No active provider. Add one in API Providers first."
+            return
+        }
+        _isSaving.value = true
+        _saveResult.value = null
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repo.saveApiKey(key)
+                refreshLegacyState()
+                _saveResult.value = "Saved ${active.name} API key"
+            } catch (e: Exception) {
+                _saveResult.value = "Failed to save: ${e.message}"
+            } finally {
+                _isSaving.value = false
+            }
+        }
+    }
 }
