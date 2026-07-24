@@ -22,9 +22,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,13 +47,18 @@ import com.tmrisdaone.studybuddy.ui.components.MessageBubble
 import com.tmrisdaone.studybuddy.ui.components.MessageInput
 import com.tmrisdaone.studybuddy.ui.theme.TurboGradients
 import com.tmrisdaone.studybuddy.ui.viewmodels.ChatViewModel
+import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
 
 @Composable
-fun ChatScreen(viewModel: ChatViewModel) {
+fun ChatScreen(viewModel: ChatViewModel, settingsViewModel: SettingsViewModel) {
     var messageText by remember { mutableStateOf("") }
     val messages by viewModel.messages.collectAsStateWithLifecycle(emptyList())
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle(false)
     val error by viewModel.error.collectAsStateWithLifecycle<String?>(null)
+    val activeLabel by viewModel.activeLabel.collectAsStateWithLifecycle("")
+    val providers by settingsViewModel.providers.collectAsStateWithLifecycle(emptyList())
+    val activeId by settingsViewModel.activeProviderId.collectAsStateWithLifecycle(null)
+    val models by settingsViewModel.models.collectAsStateWithLifecycle(emptyList())
     val colors = MaterialTheme.colorScheme
     val listState = rememberLazyListState()
 
@@ -58,7 +68,18 @@ fun ChatScreen(viewModel: ChatViewModel) {
 
     Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Header()
+            Header(
+                activeLabel = activeLabel,
+                providers = providers,
+                activeId = activeId,
+                models = models,
+                onPickProvider = {
+                    settingsViewModel.setActiveProvider(it)
+                },
+                onPickModel = { modelId ->
+                    settingsViewModel.setActiveModel(modelId)
+                }
+            )
 
             if (messages.isEmpty()) {
                 EmptyState(
@@ -116,8 +137,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
                 onSend = {
                     if (messageText.isNotBlank() && !isLoading) {
                         val systemPrompt = "You are a helpful study assistant. Provide clear, concise explanations."
-                        val model = "llama-3.1-8b-instant"
-                        viewModel.sendMessage(messageText, systemPrompt, model)
+                        viewModel.sendMessage(messageText, systemPrompt, "")
                         messageText = ""
                     }
                 },
@@ -128,8 +148,20 @@ fun ChatScreen(viewModel: ChatViewModel) {
 }
 
 @Composable
-private fun Header() {
+private fun Header(
+    activeLabel: String,
+    providers: List<com.tmrisdaone.studybuddy.domain.ApiProvider>,
+    activeId: String?,
+    models: List<com.tmrisdaone.studybuddy.domain.ModelInfo>,
+    onPickProvider: (String) -> Unit,
+    onPickModel: (String) -> Unit
+) {
     val colors = MaterialTheme.colorScheme
+    var providerMenuOpen by remember { mutableStateOf(false) }
+    var modelMenuOpen by remember { mutableStateOf(false) }
+    val active = providers.firstOrNull { it.id == activeId }
+    val modelOptions = (models.map { it.id } + (active?.defaultModel?.let { listOf(it) } ?: emptyList())).distinct()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -149,6 +181,62 @@ private fun Header() {
                 fontWeight = FontWeight.Bold,
                 color = colors.onSurface
             )
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box {
+                    Row(
+                        modifier = Modifier
+                            .background(colors.surfaceContainer, RoundedCornerShape(12.dp))
+                            .clickable { providerMenuOpen = true }
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(active?.name ?: "No provider", fontWeight = FontWeight.Medium, color = colors.onSurface, fontSize = 13.sp)
+                        Icon(
+                            androidx.compose.material.icons.Icons.Filled.ArrowDropDown,
+                            contentDescription = null,
+                            tint = colors.onSurfaceVariant
+                        )
+                    }
+                    DropdownMenu(expanded = providerMenuOpen, onDismissRequest = { providerMenuOpen = false }) {
+                        providers.forEach { p ->
+                            DropdownMenuItem(
+                                text = { Text(p.name + "  ·  " + p.type.name.replace('_', ' ')) },
+                                onClick = { onPickProvider(p.id); providerMenuOpen = false }
+                            )
+                        }
+                        if (providers.isEmpty()) {
+                            DropdownMenuItem(text = { Text("Add a provider in Settings") }, onClick = { providerMenuOpen = false })
+                        }
+                    }
+                }
+                Spacer(Modifier.width(8.dp))
+                Box {
+                    Row(
+                        modifier = Modifier
+                            .background(colors.surfaceContainer, RoundedCornerShape(12.dp))
+                            .clickable { modelMenuOpen = true }
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(active?.defaultModel?.ifBlank { "model" } ?: "model", color = colors.onSurface, fontSize = 13.sp)
+                        Icon(
+                            androidx.compose.material.icons.Icons.Filled.ArrowDropDown,
+                            contentDescription = null,
+                            tint = colors.onSurfaceVariant
+                        )
+                    }
+                    DropdownMenu(expanded = modelMenuOpen, onDismissRequest = { modelMenuOpen = false }) {
+                        if (modelOptions.isEmpty()) {
+                            DropdownMenuItem(text = { Text("Select a provider first") }, onClick = { modelMenuOpen = false })
+                        } else {
+                            modelOptions.forEach { id ->
+                                DropdownMenuItem(text = { Text(id) }, onClick = { onPickModel(id); modelMenuOpen = false })
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

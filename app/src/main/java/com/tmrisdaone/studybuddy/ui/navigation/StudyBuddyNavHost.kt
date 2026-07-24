@@ -25,6 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tmrisdaone.studybuddy.ui.screens.ChatScreen
 import com.tmrisdaone.studybuddy.ui.screens.HistoryScreen
+import com.tmrisdaone.studybuddy.ui.screens.ProviderSettingsScreen
 import com.tmrisdaone.studybuddy.ui.screens.ScannerScreen
 import com.tmrisdaone.studybuddy.ui.screens.SettingsScreen
 import com.tmrisdaone.studybuddy.ui.viewmodels.ChatViewModel
@@ -51,37 +52,41 @@ fun StudyBuddyNavHost(
     val navController = rememberNavController()
     val colors = MaterialTheme.colorScheme
 
+    val backStack by navController.currentBackStackEntryAsState()
+    val current = backStack?.destination?.route
+    val showBottomBar = current == null || current in routes.map { it.route }
+
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = colors.surfaceContainer,
-                tonalElevation = 0.dp
-            ) {
-                val backStack by navController.currentBackStackEntryAsState()
-                val current = backStack?.destination?.route
-                routes.forEach { route ->
-                    val selected = current == route.route
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(route.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            if (showBottomBar) {
+                NavigationBar(
+                    containerColor = colors.surfaceContainer,
+                    tonalElevation = 0.dp
+                ) {
+                    routes.forEach { route ->
+                        val selected = current == route.route
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = {
+                                navController.navigate(route.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(route.icon, contentDescription = route.label) },
-                        label = { Text(route.label) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = colors.primary,
-                            selectedTextColor = colors.primary,
-                            indicatorColor = colors.primaryContainer,
-                            unselectedIconColor = colors.onSurfaceVariant,
-                            unselectedTextColor = colors.onSurfaceVariant
+                            },
+                            icon = { Icon(route.icon, contentDescription = route.label) },
+                            label = { Text(route.label) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = colors.primary,
+                                selectedTextColor = colors.primary,
+                                indicatorColor = colors.primaryContainer,
+                                unselectedIconColor = colors.onSurfaceVariant,
+                                unselectedTextColor = colors.onSurfaceVariant
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
@@ -92,7 +97,7 @@ fun StudyBuddyNavHost(
             modifier = Modifier.padding(inner)
         ) {
             composable(TopRoute.Chat.route) {
-                ChatScreen(viewModel = chatViewModel)
+                ChatScreen(viewModel = chatViewModel, settingsViewModel = settingsViewModel)
             }
             composable(TopRoute.Scan.route) {
                 ScannerScreen(viewModel = scannerViewModel)
@@ -101,7 +106,12 @@ fun StudyBuddyNavHost(
                 HistoryScreen(viewModel = historyViewModel)
             }
             composable(TopRoute.Settings.route) {
-                SettingsScreen(viewModel = settingsViewModel)
+                SettingsScreen(viewModel = settingsViewModel, onNavigateToProviders = {
+                    navController.navigate("providers")
+                })
+            }
+            composable("providers") {
+                ProviderSettingsScreen(viewModel = settingsViewModel, onBack = { navController.popBackStack() })
             }
         }
     }

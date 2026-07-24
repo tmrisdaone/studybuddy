@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,7 +45,7 @@ import com.tmrisdaone.studybuddy.ui.theme.TurboGradients
 import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel) {
+fun SettingsScreen(viewModel: SettingsViewModel, onNavigateToProviders: () -> Unit = {}) {
     var apiKey by remember { mutableStateOf("") }
     var showKey by remember { mutableStateOf(false) }
 
@@ -52,7 +53,10 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
     val selectedModel by viewModel.selectedModel.collectAsStateWithLifecycle("llama-3.1-8b-instant")
     val isSaving by viewModel.isSaving.collectAsStateWithLifecycle(false)
     val saveResult by viewModel.saveResult.collectAsStateWithLifecycle<String?>(null)
+    val providers by viewModel.providers.collectAsStateWithLifecycle(emptyList())
+    val activeId by viewModel.activeProviderId.collectAsStateWithLifecycle(null)
     val colors = MaterialTheme.colorScheme
+    val activeProvider = providers.firstOrNull { it.id == activeId }
 
     Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
         Column(
@@ -73,8 +77,39 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                 modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // API Key card
-                SettingCard(title = "Groq API Key", icon = Icons.Filled.VpnKey) {
+                // API Providers entry card
+                Surface(
+                    shape = RoundedCornerShape(18.dp),
+                    color = colors.surfaceContainer,
+                    modifier = Modifier.fillMaxWidth().clickable { onNavigateToProviders() }
+                ) {
+                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            Modifier.size(32.dp).background(TurboGradients.accent, RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Filled.VpnKey, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("API Providers", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = colors.onSurface)
+                            Text(
+                                activeProvider?.let { "Active: ${it.name} · ${it.defaultModel.ifBlank { "default" }}" }
+                                    ?: "Add NVIDIA NIM, Ollama, or custom endpoints",
+                                fontSize = 12.sp,
+                                color = colors.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            androidx.compose.material.icons.Icons.Filled.ChevronRight,
+                            contentDescription = null,
+                            tint = colors.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // API Key card (legacy, edits the active provider's key)
+                SettingCard(title = "Active API Key", icon = Icons.Filled.VpnKey) {
                     OutlinedTextField(
                         value = apiKey,
                         onValueChange = { apiKey = it },
