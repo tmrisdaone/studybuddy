@@ -2,11 +2,19 @@ package com.tmrisdaone.studybuddy.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.TextAlign
+import androidx.compose.ui.text.TextOverflow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,9 +42,11 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.ui.viewmodels.ScannerViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScannerScreen(
     viewModel: ScannerViewModel,
@@ -63,25 +73,25 @@ fun ScannerScreen(
             }
         )
         
-        androidx.compose.foundation.layout.Column(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
                     .background(
                         color = colors.surfaceContainer,
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(16.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 if (!scannedText.isBlank() && showText) {
-                    androidx.compose.foundation.layout.Column(
+                    Column(
                         modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -91,16 +101,16 @@ fun ScannerScreen(
                             fontSize = 18.sp,
                             color = colors.onSurface
                         )
-                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = scannedText,
                             maxLines = 10,
-                            overflow = androidx.compose.ui.text.TextOverflow.Ellipsis,
+                            overflow = TextOverflow.Ellipsis,
                             color = colors.onSurface
                         )
                     }
                 } else {
-                    androidx.compose.foundation.layout.Column(
+                    Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
@@ -144,7 +154,7 @@ fun ScannerScreen(
                             color = colors.onPrimary
                         )
                     } else {
-                        androidx.compose.foundation.layout.Row(
+                        Row(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -152,7 +162,7 @@ fun ScannerScreen(
                                 imageVector = Icons.Filled.CameraAlt,
                                 contentDescription = ""
                             )
-                            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.width(8.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text("Scan with Camera")
                         }
                     }
@@ -165,7 +175,7 @@ fun ScannerScreen(
                         .fillMaxWidth()
                         .width(280.dp)
                 ) {
-                    androidx.compose.foundation.layout.Row(
+                    Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -173,7 +183,7 @@ fun ScannerScreen(
                             imageVector = Icons.Filled.PhotoLibrary,
                             contentDescription = ""
                         )
-                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.width(8.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text("Pick from Gallery")
                     }
                 }
@@ -232,13 +242,13 @@ fun ScannerScreen(
                 }
             }
             
-            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "Note: Camera integration requires CameraX + ML Kit setup",
                 fontSize = 12.sp,
                 color = colors.onSurfaceVariant.copy(alpha = 0.7f),
-                textAlign = androidx.compose.ui.text.TextAlign.Center
+                textAlign = TextAlign.Center
             )
         }
     }

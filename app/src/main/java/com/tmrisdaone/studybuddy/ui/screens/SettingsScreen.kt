@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,9 +34,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.ui.viewmodels.SettingsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -75,7 +79,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Groq API Key", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
                     TextField(
                         value = apiKey,
@@ -90,7 +94,7 @@ fun SettingsScreen(
                         )
                     )
                     
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
                     Button(
                         onClick = {
@@ -120,9 +124,9 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Model", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text("Current: $selectedModel", color = colors.onSurfaceVariant)
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text("Available: llama-3.1-8b-instant, llama-3.1-70b-versatile, mixtral-8x7b-32768, gemma2-9b-it",
                          color = colors.onSurfaceVariant.copy(alpha = 0.7f), fontSize = 12.sp)
                 }
@@ -135,7 +139,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Status", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface)
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
                     if (savedApiKey.isNotBlank()) {
                         androidx.compose.foundation.layout.Row(
@@ -153,7 +157,7 @@ fun SettingsScreen(
                         Text("API Key: Not configured", color = colors.onSurfaceVariant)
                     }
                     
-                    androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     
                     androidx.compose.foundation.layout.Row(
                         modifier = Modifier.fillMaxWidth(),
