@@ -41,6 +41,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     
+    // Hilt Navigation Compose (for hiltViewModel)
+    implementation(libs.hilt.navigation.compose)
+    
     // Compose BOM
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
