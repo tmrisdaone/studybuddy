@@ -174,7 +174,7 @@ private fun PromptChip(text: String, onClick: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = colors.surfaceContainer,
-        modifier = Modifier.fillMaxWidth().clickable(onClick)
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }
     ) {
         Text(
             text,
