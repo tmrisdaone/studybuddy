@@ -2,136 +2,108 @@ package com.tmrisdaone.studybuddy.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.DocumentScanner
-import androidx.compose.material.icons.filled.Style
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.domain.StudySession
+import com.tmrisdaone.studybuddy.ui.theme.TurboGradients
 import com.tmrisdaone.studybuddy.ui.viewmodels.HistoryViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(
-    viewModel: HistoryViewModel,
-    onNavigateToChat: () -> Unit
-) {
+fun HistoryScreen(viewModel: HistoryViewModel) {
     val sessions by viewModel.sessions.collectAsStateWithLifecycle(emptyList())
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle(false)
     val colors = MaterialTheme.colorScheme
-    
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("History", fontWeight = FontWeight.Bold) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.surfaceContainer),
-            navigationIcon = {
-                IconButton(onClick = onNavigateToChat) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = { viewModel.refresh() }, enabled = !isLoading) {
-                    Icon(
-                        imageVector = Icons.Filled.Refresh,
-                        contentDescription = "Refresh"
-                    )
-                }
-            }
-        )
-        
-        if (sessions.isEmpty() && !isLoading) {
-            androidx.compose.foundation.layout.Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.History,
-                        contentDescription = "",
-                        modifier = Modifier.size(64.dp),
-                        tint = colors.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                    Text(
-                        "No study sessions yet",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = colors.onSurfaceVariant
-                    )
-                    Text(
-                        "Start chatting or scanning to create sessions",
-                        fontSize = 14.sp,
-                        color = colors.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(sessions) { session ->
-                    SessionCard(session = session)
-                }
-            }
-        }
-        
-        if (isLoading) {
-            androidx.compose.foundation.layout.Box(
+
+    Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                    .background(TurboGradients.header)
+                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                CircularProgressIndicator()
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("History", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colors.primary)
+                    Text("Your study sessions", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = colors.onSurface)
+                }
+                IconButton(onClick = { viewModel.refresh() }, enabled = !isLoading) {
+                    Icon(Icons.Filled.Refresh, contentDescription = "Refresh", tint = colors.primary)
+                }
+            }
+
+            if (sessions.isEmpty() && !isLoading) {
+                EmptyHistory()
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(sessions) { session -> SessionCard(session) }
+                    if (isLoading) {
+                        item {
+                            Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(color = colors.primary)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun SessionCard(session: StudySession) {
+private fun EmptyHistory() {
+    val colors = MaterialTheme.colorScheme
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Icon(Icons.Filled.History, contentDescription = null, modifier = Modifier.size(60.dp), tint = colors.primary.copy(alpha = 0.6f))
+            Text("No study sessions yet", fontSize = 18.sp, fontWeight = FontWeight.Medium, color = colors.onSurfaceVariant)
+            Text("Start chatting or scanning to create sessions", fontSize = 14.sp, color = colors.onSurfaceVariant.copy(alpha = 0.7f))
+        }
+    }
+}
+
+@Composable
+private fun SessionCard(session: StudySession) {
+    val colors = MaterialTheme.colorScheme
     val typeIcon = when (session.type) {
         "chat" -> Icons.Filled.Chat
         "pdf" -> Icons.Filled.PictureAsPdf
@@ -140,69 +112,37 @@ fun SessionCard(session: StudySession) {
         "flashcards" -> Icons.Filled.Style
         else -> Icons.Filled.Folder
     }
-    
-    // Convert Instant to readable string
     val dateStr = session.createdAt.toString().substring(0, 16).replace('T', ' ')
-    val colors = MaterialTheme.colorScheme
-    
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = colors.surfaceContainer
-        )
+
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = colors.surfaceContainer,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        androidx.compose.foundation.layout.Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = typeIcon,
-                contentDescription = session.type,
-                modifier = Modifier.size(24.dp),
-                tint = colors.primary
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            androidx.compose.foundation.layout.Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(40.dp).background(TurboGradients.accent, RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
             ) {
+                Icon(typeIcon, contentDescription = session.type, tint = colors.onPrimary, modifier = Modifier.size(22.dp))
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = session.title,
+                    session.title,
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
                     color = colors.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                androidx.compose.foundation.layout.Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = session.type.capitalize(),
-                        fontSize = 12.sp,
-                        color = colors.onSurfaceVariant
-                    )
-                    Text(
-                        text = "•",
-                        fontSize = 12.sp,
-                        color = colors.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                    Text(
-                        text = dateStr,
-                        fontSize = 12.sp,
-                        color = colors.onSurfaceVariant
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(session.type, fontSize = 12.sp, color = colors.onSurfaceVariant)
+                    Text("•", fontSize = 12.sp, color = colors.onSurfaceVariant.copy(alpha = 0.5f))
+                    Text(dateStr, fontSize = 12.sp, color = colors.onSurfaceVariant)
                 }
                 session.summary?.let { summary ->
-                    Text(
-                        text = summary,
-                        fontSize = 13.sp,
-                        color = colors.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Text(summary, fontSize = 13.sp, color = colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
