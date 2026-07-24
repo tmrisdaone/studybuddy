@@ -7,6 +7,7 @@ import com.tmrisdaone.studybuddy.data.remote.ProotScraper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -16,13 +17,16 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@Suppress("UNUSED_PARAMETER") context: Context): StudyBuddyDatabase {
+    fun provideDatabase(@ApplicationContext context: Context): StudyBuddyDatabase {
         return StudyBuddyDatabase.get(context)
     }
 
     @Provides
     @Singleton
-    fun provideRepository(database: StudyBuddyDatabase, context: Context): StudyBuddyRepository {
+    fun provideRepository(
+        database: StudyBuddyDatabase,
+        @ApplicationContext context: Context
+    ): StudyBuddyRepository {
         return StudyBuddyRepository(database, context)
     }
 
