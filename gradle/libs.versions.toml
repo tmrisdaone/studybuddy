@@ -9,7 +9,7 @@ targetSdk = "34"
 coreKtx = "1.13.1"
 lifecycle = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2024.02.00"
+composeBom = "2024.06.00"
 composeCompiler = "1.5.14"
 navigationCompose = "2.8.0"
 room = "2.6.1"
@@ -35,7 +35,7 @@ androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lif
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 
 # Hilt Navigation Compose (for hiltViewModel)
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.2.0" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt" }
 
 # Compose
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
