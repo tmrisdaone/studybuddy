@@ -3,12 +3,15 @@ package com.tmrisdaone.studybuddy.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tmrisdaone.studybuddy.data.repo.StudyBuddyRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ScannerViewModel(private val repo: StudyBuddyRepository) : ViewModel() {
+@HiltViewModel
+class ScannerViewModel @Inject constructor(private val repo: StudyBuddyRepository) : ViewModel() {
     
     private val _scannedText = MutableStateFlow("")
     val scannedText = _scannedText.asStateFlow()

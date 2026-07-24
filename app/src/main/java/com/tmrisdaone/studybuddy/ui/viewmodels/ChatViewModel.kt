@@ -4,12 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tmrisdaone.studybuddy.data.repo.StudyBuddyRepository
 import com.tmrisdaone.studybuddy.domain.ChatMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ChatViewModel(private val repo: StudyBuddyRepository) : ViewModel() {
+@HiltViewModel
+class ChatViewModel @Inject constructor(private val repo: StudyBuddyRepository) : ViewModel() {
     
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages = _messages.asStateFlow()
