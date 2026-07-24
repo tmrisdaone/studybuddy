@@ -1,174 +1,193 @@
 package com.tmrisdaone.studybuddy.ui.screens
 
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.domain.ChatMessage
 import com.tmrisdaone.studybuddy.ui.components.MessageBubble
 import com.tmrisdaone.studybuddy.ui.components.MessageInput
+import com.tmrisdaone.studybuddy.ui.theme.TurboGradients
 import com.tmrisdaone.studybuddy.ui.viewmodels.ChatViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExperimentalMaterial3Api
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(
-    viewModel: ChatViewModel,
-    onNavigateToHistory: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToScanner: () -> Unit
-) {
+fun ChatScreen(viewModel: ChatViewModel) {
     var messageText by remember { mutableStateOf("") }
     val messages by viewModel.messages.collectAsStateWithLifecycle(emptyList())
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle(false)
     val error by viewModel.error.collectAsStateWithLifecycle<String?>(null)
-    
-    val scrollState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()
-    
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom
-    ) {
-        TopAppBar(
-            title = { Text("StudyBuddy Chat", fontWeight = FontWeight.Bold) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-            navigationIcon = {
-                IconButton(onClick = onNavigateToHistory) {
-                    Icon(
-                        imageVector = Icons.Filled.History,
-                        contentDescription = "History"
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = onNavigateToScanner) {
-                    Icon(
-                        imageVector = Icons.Filled.DocumentScanner,
-                        contentDescription = "Scanner"
-                    )
-                }
-                IconButton(onClick = onNavigateToSettings) {
-                    Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = "Settings"
-                    )
-                }
-            }
-        )
-        
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 0.dp, bottom = 0.dp)
-                .verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    val colors = MaterialTheme.colorScheme
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(messages.size, isLoading) {
+        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Header()
+
             if (messages.isEmpty()) {
-                androidx.compose.foundation.layout.Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Start a conversation\nTap the scanner to capture text",
-                        textAlign = TextAlign.Center,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                EmptyState(
+                    onPrompt = { msg ->
+                        messageText = msg
+                    }
+                )
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    reverseLayout = true
+                    state = listState,
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(messages.reversed()) { message ->
-                        MessageBubble(message = message)
-                    }
+                    items(messages) { msg -> MessageBubble(msg) }
                     item {
-                        if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            )
+                        AnimatedVisibility(visible = isLoading, enter = fadeIn(), exit = fadeOut()) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        strokeWidth = 2.dp,
+                                        color = colors.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text("Thinking…", color = colors.onSurfaceVariant, fontSize = 13.sp)
+                                }
+                            }
                         }
                     }
                 }
             }
-            
+
             error?.let { err ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
+                Surface(
+                    color = colors.errorContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Text(
                         err,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.padding(16.dp)
+                        color = colors.onErrorContainer,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(12.dp)
                     )
                 }
             }
-        }
-        
-        MessageInput(
-            messageText = messageText,
-            onTextChange = { messageText = it },
-            onSend = {
-                if (messageText.isNotBlank() && !isLoading) {
-                    val systemPrompt = "You are a helpful study assistant. Provide clear, concise explanations."
-                    val model = "llama-3.1-8b-instant"
-                    viewModel.sendMessage(messageText, systemPrompt, model)
-                    messageText = ""
-                    coroutineScope.launch {
-                        kotlinx.coroutines.delay(100)
-                        scrollState.animateScrollTo(0)
+
+            MessageInput(
+                messageText = messageText,
+                onTextChange = { messageText = it },
+                onSend = {
+                    if (messageText.isNotBlank() && !isLoading) {
+                        val systemPrompt = "You are a helpful study assistant. Provide clear, concise explanations."
+                        val model = "llama-3.1-8b-instant"
+                        viewModel.sendMessage(messageText, systemPrompt, model)
+                        messageText = ""
                     }
-                }
-            },
-            isLoading = isLoading
+                },
+                isLoading = isLoading
+            )
+        }
+    }
+}
+
+@Composable
+private fun Header() {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(TurboGradients.header)
+            .padding(horizontal = 20.dp, vertical = 18.dp)
+    ) {
+        Column {
+            Text(
+                "StudyBuddy",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.primary
+            )
+            Text(
+                "What do you want to learn today?",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = colors.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyState(onPrompt: (String) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text("Try one of these:", color = colors.onSurfaceVariant, fontSize = 13.sp)
+        prompts.forEach { prompt ->
+            PromptChip(prompt) { onPrompt(prompt) }
+        }
+    }
+}
+
+@Composable
+private fun PromptChip(text: String, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = colors.surfaceContainer,
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }
+    ) {
+        Text(
+            text,
+            color = colors.onSurface,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
         )
     }
 }
+
+private val prompts = listOf(
+    "Explain photosynthesis simply",
+    "Summarize the French Revolution",
+    "Give me 5 quiz questions on algebra",
+    "What's the difference between mitosis and meiosis?"
+)
