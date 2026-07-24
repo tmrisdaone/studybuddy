@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -27,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -36,10 +40,12 @@ import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tmrisdaone.studybuddy.domain.StudySession
 import com.tmrisdaone.studybuddy.ui.viewmodels.HistoryViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel,
@@ -155,7 +161,7 @@ fun SessionCard(session: StudySession) {
                 modifier = Modifier.size(24.dp),
                 tint = colors.primary
             )
-            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.width(12.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             androidx.compose.foundation.layout.Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -168,7 +174,7 @@ fun SessionCard(session: StudySession) {
                     fontSize = 16.sp,
                     color = colors.onSurface,
                     maxLines = 1,
-                    overflow = androidx.compose.ui.text.TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis
                 )
                 androidx.compose.foundation.layout.Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -195,7 +201,7 @@ fun SessionCard(session: StudySession) {
                         fontSize = 13.sp,
                         color = colors.onSurfaceVariant,
                         maxLines = 2,
-                        overflow = androidx.compose.ui.text.TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
