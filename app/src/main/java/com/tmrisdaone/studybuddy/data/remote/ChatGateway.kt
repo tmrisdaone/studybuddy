@@ -90,7 +90,9 @@ class ChatGateway {
                     return
                 }
                 try {
-                    response.body.use { b ->
+                    val body = response.body
+                        ?: run { close(IOException("Empty response from ${provider.name}")); return }
+                    body.use { b ->
                         val source = b.source()
                         while (!source.exhausted()) {
                             val line = source.readUtf8Line() ?: break
