@@ -31,6 +31,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Remove stale local.properties
+        run: rm -f local.properties
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon
 
@@ -50,5 +53,8 @@ jobs:
         if: always()
         with:
           name: lint-report
-          path: app/build/reports/lint-results-debug.html
+          path: |
+            app/build/reports/lint-results-debug.html
+            app/build/reports/lint-results-debug.xml
+          if-no-files-found: ignore
           retention-days: 7
